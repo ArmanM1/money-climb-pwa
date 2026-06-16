@@ -1,8 +1,8 @@
-const cacheName = "money-quest-v7";
+const cacheName = "money-quest-v8";
 const files = [
   "./",
   "./index.html",
-  "./app.js?v=7",
+  "./app.js?v=8",
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png"

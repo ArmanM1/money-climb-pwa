@@ -272,10 +272,15 @@
       }
 
       .stat-grid,
-      .metrics,
       .settings-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: 1fr;
         gap: 10px;
       }
 
@@ -316,70 +321,6 @@
         font-size: 24px;
         line-height: 1;
         font-variant-numeric: tabular-nums;
-      }
-
-      .unlock-card {
-        position: relative;
-        min-height: 112px;
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 8px;
-        align-items: center;
-        padding: 13px;
-        border: 1px solid rgba(9, 168, 95, 0.18);
-        border-radius: 16px;
-        color: var(--ink);
-        text-align: left;
-        background:
-          radial-gradient(circle at 88% 10%, rgba(128, 239, 104, 0.34), transparent 34%),
-          rgba(255, 255, 255, 0.88);
-      }
-
-      .unlock-card:active {
-        transform: translateY(1px);
-      }
-
-      .unlock-card span {
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 840;
-      }
-
-      .unlock-card strong {
-        display: block;
-        margin-top: 4px;
-        font-size: 20px;
-        line-height: 1;
-        font-weight: 900;
-      }
-
-      .unlock-card em {
-        display: block;
-        margin-top: 5px;
-        color: #07864d;
-        font-style: normal;
-        font-size: 12px;
-        font-weight: 850;
-      }
-
-      .unlock-icon {
-        width: 36px;
-        height: 36px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        color: #06351e;
-        background: var(--lime);
-      }
-
-      .unlock-icon svg {
-        width: 20px;
-        height: 20px;
-      }
-
-      .unlock-card .progress-line {
-        grid-column: 1 / -1;
-        height: 8px;
       }
 
       .section-title {
@@ -506,7 +447,7 @@
 
       .workday-stage {
         position: relative;
-        min-height: 300px;
+        min-height: 292px;
         padding: 18px 15px 16px;
         overflow: hidden;
         border-radius: 26px;
@@ -562,7 +503,7 @@
         z-index: 3;
         top: 14px;
         right: 14px;
-        width: 128px;
+        width: 124px;
         padding: 12px;
         border: 1px solid rgba(255, 255, 255, 0.44);
         border-radius: 18px;
@@ -579,12 +520,10 @@
       }
 
       .eod-card strong {
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        display: block;
         margin-top: 4px;
         color: #72ff86;
-        font-size: 24px;
+        font-size: 25px;
         line-height: 1;
         font-weight: 920;
         font-variant-numeric: tabular-nums;
@@ -605,29 +544,24 @@
         font-weight: 760;
       }
 
-      .eod-card svg {
-        width: 22px;
-        height: 22px;
-      }
-
       .beam-wrap {
         position: absolute;
         z-index: 2;
-        left: 25px;
-        right: 25px;
-        bottom: 88px;
-        height: 54px;
+        left: 26px;
+        right: 26px;
+        bottom: 92px;
+        height: 76px;
       }
 
       .beam-track {
         position: absolute;
-        left: 20px;
-        right: 20px;
-        top: 23px;
-        height: 12px;
+        left: 31px;
+        right: 31px;
+        top: 35px;
+        height: 8px;
         border-radius: 999px;
-        background: repeating-linear-gradient(90deg, rgba(255,255,255,.82) 0 12px, transparent 12px 24px);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.34);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
       }
 
       .beam-track i {
@@ -644,9 +578,9 @@
       .beam-finish {
         position: absolute;
         z-index: 4;
-        top: 6px;
-        width: 45px;
-        height: 45px;
+        top: 17px;
+        width: 44px;
+        height: 44px;
         display: grid;
         place-items: center;
         border: 4px solid rgba(255, 255, 255, 0.9);
@@ -660,8 +594,8 @@
       }
 
       .beam-start span {
-        width: 24px;
-        height: 24px;
+        width: 25px;
+        height: 25px;
         border-radius: 50%;
         background: #75ff82;
         box-shadow: inset 0 -4px 0 rgba(6, 111, 55, 0.24);
@@ -670,24 +604,21 @@
       .beam-finish {
         right: 0;
         color: #ffffff;
+        font-size: 12px;
+        font-weight: 920;
         box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.14), 0 0 22px rgba(255,255,255,.36);
-      }
-
-      .beam-finish svg {
-        width: 23px;
-        height: 23px;
       }
 
       .milestone-row {
         position: absolute;
         z-index: 5;
-        inset: 0 42px 0 42px;
+        inset: 0 46px 0 46px;
       }
 
       .milestone {
         position: absolute;
         left: var(--x);
-        top: 0;
+        top: 9px;
         width: 58px;
         transform: translateX(-50%);
         text-align: center;
@@ -696,22 +627,22 @@
 
       .milestone b {
         display: block;
-        margin-bottom: 7px;
+        margin-bottom: 6px;
         font-size: 11px;
         font-weight: 880;
       }
 
       .milestone span {
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
         display: grid;
         place-items: center;
         margin: 0 auto;
-        border: 3px solid rgba(255, 255, 255, 0.88);
+        border: 4px solid rgba(255, 255, 255, 0.9);
         border-radius: 50%;
         color: rgba(255, 255, 255, 0.88);
-        background: rgba(255, 255, 255, 0.18);
-        box-shadow: 0 8px 16px rgba(0,0,0,.12);
+        background: rgba(16, 84, 93, 0.58);
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 0 8px 16px rgba(0,0,0,.12);
         font-size: 10px;
         font-weight: 900;
       }
@@ -721,13 +652,9 @@
         background: #76ff83;
       }
 
-      .milestone.finish {
-        top: -54px;
-      }
-
       .milestone em {
         display: block;
-        margin-top: 13px;
+        margin-top: 12px;
         color: rgba(255, 255, 255, 0.82);
         font-style: normal;
         font-size: 10px;
@@ -960,121 +887,6 @@
         line-height: 1.4;
       }
 
-      .unlock-modal[hidden] {
-        display: none;
-      }
-
-      .unlock-modal {
-        position: fixed;
-        inset: 0;
-        z-index: 30;
-        display: grid;
-        align-items: end;
-      }
-
-      .modal-backdrop {
-        position: absolute;
-        inset: 0;
-        background: rgba(4, 15, 9, 0.34);
-        backdrop-filter: blur(8px);
-      }
-
-      .unlock-sheet {
-        position: relative;
-        z-index: 1;
-        width: min(100%, 430px);
-        max-height: min(88vh, 760px);
-        margin: 0 auto;
-        overflow: auto;
-        padding: 18px 18px calc(env(safe-area-inset-bottom, 0px) + 18px);
-        border-radius: 28px 28px 0 0;
-        background: #f7fbf5;
-        box-shadow: 0 -28px 70px rgba(0, 0, 0, 0.22);
-      }
-
-      .sheet-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 14px;
-      }
-
-      .sheet-head h2 {
-        margin: 0;
-        font-size: 25px;
-        line-height: 1;
-      }
-
-      .sheet-head p {
-        margin: 6px 0 0;
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.35;
-        font-weight: 720;
-      }
-
-      .sheet-close {
-        width: 38px;
-        height: 38px;
-        border: 0;
-        border-radius: 50%;
-        color: var(--ink);
-        background: #e6f0e9;
-        font-size: 22px;
-        line-height: 1;
-      }
-
-      .unlock-preview {
-        margin: 0 0 12px;
-        padding: 13px;
-        border: 1px solid rgba(9, 168, 95, 0.18);
-        border-radius: 18px;
-        background:
-          radial-gradient(circle at 88% 10%, rgba(128, 239, 104, 0.34), transparent 32%),
-          #ffffff;
-      }
-
-      .unlock-preview strong {
-        display: block;
-        font-size: 26px;
-      }
-
-      .unlock-preview span {
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 820;
-      }
-
-      .setting-card select {
-        width: 100%;
-        height: 42px;
-        border: 1px solid #cfe1d5;
-        border-radius: 12px;
-        padding: 0 12px;
-        color: var(--ink);
-        background: #ffffff;
-        font-size: 15px;
-        font-weight: 780;
-        outline: none;
-      }
-
-      .sheet-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 12px;
-      }
-
-      .unlock-status {
-        min-height: 20px;
-        margin: 10px 0 0;
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.35;
-        font-weight: 780;
-      }
-
       .tabbar {
         position: sticky;
         bottom: 0;
@@ -1225,15 +1037,13 @@
             <div class="workday-title">Progress to end of workday</div>
             <div class="eod-card">
               <span>Projected EOD</span>
-              <strong><span id="projectedEod">$0</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 17 9 12l4 4 7-9M15 7h5v5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></strong>
+              <strong><span id="projectedEod">$0</span></strong>
               <em>of <span id="plannedTodayLabel">$0</span> planned</em>
             </div>
             <div class="beam-wrap">
               <div class="beam-start" aria-hidden="true"><span></span></div>
               <div class="beam-track" id="workdayBeam"><i></i></div>
-              <div class="beam-finish" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M6 21V4m0 1h10l-2 4 2 4H6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
+              <div class="beam-finish" aria-hidden="true">100%</div>
               <div class="milestone-row" id="milestoneRow"></div>
             </div>
             <div class="stage-captions">
@@ -1248,17 +1058,6 @@
               <strong id="timeLeft">0h 00m</strong>
               <div class="progress-line"><i id="timeProgress"></i></div>
             </div>
-            <button class="unlock-card" id="unlockCard" type="button" aria-label="Choose next unlock">
-              <div>
-                <span>Next unlock</span>
-                <strong id="unlockTitle">Flight</strong>
-                <em id="unlockMeta">$0 away · -- left</em>
-              </div>
-              <div class="unlock-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M3 16.5 21 4l-5.2 16-4.1-6.3L3 16.5Zm8.7-2.8L21 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <div class="progress-line"><i id="unlockProgress"></i></div>
-            </button>
           </section>
 
           <section class="compound-card" aria-label="Compounding projection">
@@ -1339,69 +1138,8 @@
         </button>
       </nav>
 
-      <div class="unlock-modal" id="unlockModal" hidden>
-        <div class="modal-backdrop" id="unlockBackdrop"></div>
-        <section class="unlock-sheet" role="dialog" aria-modal="true" aria-labelledby="unlockSheetTitle">
-          <div class="sheet-head">
-            <div>
-              <h2 id="unlockSheetTitle">Next unlock</h2>
-              <p>Pick a flight route or a fallback item. Your live earnings count down to the unlock price.</p>
-            </div>
-            <button class="sheet-close" id="closeUnlockButton" type="button" aria-label="Close unlock settings">×</button>
-          </div>
-
-          <div class="unlock-preview">
-            <span id="unlockPreviewType">Flight to unlock</span>
-            <strong id="unlockPreviewRoute">DEN → JFK</strong>
-            <span id="unlockPreviewPrice">$280 target fare</span>
-          </div>
-
-          <div class="settings-grid">
-            <label class="setting-card">Unlock type
-              <select id="unlockModeInput">
-                <option value="flight">Flight</option>
-                <option value="item">Fallback item</option>
-              </select>
-            </label>
-            <label class="setting-card">Target price<input id="targetPriceInput" inputmode="decimal" type="number" min="1" step="1" /></label>
-            <label class="setting-card">Departing airport<input id="originInput" list="airportList" maxlength="3" autocapitalize="characters" /></label>
-            <label class="setting-card">Arrival airport<input id="destinationInput" list="airportList" maxlength="3" autocapitalize="characters" /></label>
-            <label class="setting-card">Depart date<input id="departureDateInput" type="date" /></label>
-            <label class="setting-card">Fallback item
-              <select id="fallbackItemInput">
-                <option value="Coffee paid off">Coffee paid off</option>
-                <option value="Lunch covered">Lunch covered</option>
-                <option value="Gas covered">Gas covered</option>
-                <option value="Dinner covered">Dinner covered</option>
-                <option value="Weekend fund">Weekend fund</option>
-              </select>
-            </label>
-          </div>
-          <label class="setting-card" style="margin-top:10px">Live fare token <input id="flightTokenInput" type="password" autocomplete="off" placeholder="Optional Travelpayouts token" /></label>
-          <div class="sheet-actions">
-            <button class="secondary-button" id="checkFareButton" type="button">Check Fare</button>
-            <button class="primary-button" id="saveUnlockButton" type="button">Save Unlock</button>
-          </div>
-          <p class="unlock-status" id="unlockStatus">No browser-safe free fare source is configured. The app will use your target fare unless a live source returns a price.</p>
-        </section>
-      </div>
-
-      <datalist id="airportList">
-        <option value="DEN">Denver</option>
-        <option value="JFK">New York JFK</option>
-        <option value="LGA">New York LaGuardia</option>
-        <option value="EWR">Newark</option>
-        <option value="LAX">Los Angeles</option>
-        <option value="SFO">San Francisco</option>
-        <option value="SEA">Seattle</option>
-        <option value="ORD">Chicago O'Hare</option>
-        <option value="AUS">Austin</option>
-        <option value="MIA">Miami</option>
-        <option value="BOS">Boston</option>
-        <option value="LAS">Las Vegas</option>
-      </datalist>
     </div>
 
-    <script src="./app.js?v=7" defer></script>
+    <script src="./app.js?v=8" defer></script>
   </body>
 </html>
