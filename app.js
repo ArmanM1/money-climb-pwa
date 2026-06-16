@@ -10,6 +10,35 @@ const defaultSettings = {
   years: 40
 };
 
+const fallbackItemPrices = {
+  "Coffee paid off": 7,
+  "Lunch covered": 18,
+  "Gas covered": 55,
+  "Dinner covered": 90,
+  "Weekend fund": 250
+};
+
+function defaultDepartureDate() {
+  const date = new Date();
+  date.setDate(date.getDate() + 30);
+  return date.toISOString().slice(0, 10);
+}
+
+function defaultUnlock() {
+  return {
+    mode: "flight",
+    origin: "DEN",
+    destination: "JFK",
+    departureDate: defaultDepartureDate(),
+    targetPrice: 280,
+    fallbackItem: "Weekend fund",
+    flightToken: "",
+    lastPrice: null,
+    lastChecked: null,
+    source: "Target fare"
+  };
+}
+
 const money = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -38,17 +67,21 @@ const els = {
   percentToGoal: document.querySelector("#percentToGoal"),
   goalLabel: document.querySelector("#goalLabel"),
   goalLine: document.querySelector("#goalLine"),
-  questStage: document.querySelector("#questStage"),
-  questPercent: document.querySelector("#questPercent"),
+  workdayStage: document.querySelector("#workdayStage"),
+  workdayBeam: document.querySelector("#workdayBeam"),
+  milestoneRow: document.querySelector("#milestoneRow"),
+  projectedEod: document.querySelector("#projectedEod"),
   plannedTodayLabel: document.querySelector("#plannedTodayLabel"),
-  checkpointRail: document.querySelector("#checkpointRail"),
-  routeAvatar: document.querySelector("#routeAvatar"),
   stageEarned: document.querySelector("#stageEarned"),
   stagePlanned: document.querySelector("#stagePlanned"),
+  workdayStartLabel: document.querySelector("#workdayStartLabel"),
+  workdayEndLabel: document.querySelector("#workdayEndLabel"),
   timeLeft: document.querySelector("#timeLeft"),
   timeProgress: document.querySelector("#timeProgress"),
-  remainingAmount: document.querySelector("#remainingAmount"),
-  remainingProgress: document.querySelector("#remainingProgress"),
+  unlockCard: document.querySelector("#unlockCard"),
+  unlockTitle: document.querySelector("#unlockTitle"),
+  unlockMeta: document.querySelector("#unlockMeta"),
+  unlockProgress: document.querySelector("#unlockProgress"),
   compoundPercent: document.querySelector("#compoundPercent"),
   compoundValue: document.querySelector("#compoundValue"),
   returnLabel: document.querySelector("#returnLabel"),
@@ -71,7 +104,23 @@ const els = {
   statsAverage: document.querySelector("#statsAverage"),
   statsBest: document.querySelector("#statsBest"),
   statsStreak: document.querySelector("#statsStreak"),
-  historyList: document.querySelector("#historyList")
+  historyList: document.querySelector("#historyList"),
+  unlockModal: document.querySelector("#unlockModal"),
+  unlockBackdrop: document.querySelector("#unlockBackdrop"),
+  closeUnlockButton: document.querySelector("#closeUnlockButton"),
+  unlockModeInput: document.querySelector("#unlockModeInput"),
+  targetPriceInput: document.querySelector("#targetPriceInput"),
+  originInput: document.querySelector("#originInput"),
+  destinationInput: document.querySelector("#destinationInput"),
+  departureDateInput: document.querySelector("#departureDateInput"),
+  fallbackItemInput: document.querySelector("#fallbackItemInput"),
+  flightTokenInput: document.querySelector("#flightTokenInput"),
+  checkFareButton: document.querySelector("#checkFareButton"),
+  saveUnlockButton: document.querySelector("#saveUnlockButton"),
+  unlockStatus: document.querySelector("#unlockStatus"),
+  unlockPreviewType: document.querySelector("#unlockPreviewType"),
+  unlockPreviewRoute: document.querySelector("#unlockPreviewRoute"),
+  unlockPreviewPrice: document.querySelector("#unlockPreviewPrice")
 };
 
 let state = readState();
@@ -96,7 +145,23 @@ function normalizeState(raw) {
   return {
     settings: { ...defaultSettings, ...(raw.settings || {}) },
     session: raw.session || null,
-    history: raw.history || {}
+    history: raw.history || {},
+    unlock: normalizeUnlock(raw.unlock || raw.flightUnlock || {})
+  };
+}
+
+function normalizeUnlock(raw) {
+  const base = defaultUnlock();
+  const merged = { ...base, ...raw };
+  const fallbackPrice = fallbackItemPrices[merged.fallbackItem] || base.targetPrice;
+  return {
+    ...merged,
+    mode: merged.mode === "item" ? "item" : "flight",
+    origin: sanitizeAirport(merged.origin || base.origin),
+    destination: sanitizeAirport(merged.destination || base.destination),
+    departureDate: merged.departureDate || base.departureDate,
+    targetPrice: Math.max(1, Number(merged.targetPrice) || fallbackPrice),
+    lastPrice: Number.isFinite(Number(merged.lastPrice)) ? Number(merged.lastPrice) : null
   };
 }
 
@@ -162,36 +227,31 @@ function setLineProgress(node, percent) {
   if (fill) fill.style.width = safePercent;
 }
 
-function setQuestProgress(percent) {
-  const safePercent = clamp(percent, 0, 100);
-  const routeLength = 430;
-  els.questStage.style.setProperty("--route-offset", `${routeLength - routeLength * (safePercent / 100)}`);
-  const position = routePosition(safePercent);
-  els.routeAvatar.style.setProperty("--avatar-x", `${position.x}%`);
-  els.routeAvatar.style.setProperty("--avatar-y", `${position.y}%`);
+function setWorkdayProgress(percent) {
+  setLineProgress(els.workdayBeam, percent);
 }
 
-function routePosition(percent) {
-  const points = [
-    { pct: 0, x: 10, y: 84 },
-    { pct: 25, x: 16, y: 72 },
-    { pct: 50, x: 36, y: 53 },
-    { pct: 75, x: 62, y: 42 },
-    { pct: 100, x: 82, y: 23 }
-  ];
-  const safePercent = clamp(percent, 0, 100);
-  for (let index = 0; index < points.length - 1; index += 1) {
-    const start = points[index];
-    const end = points[index + 1];
-    if (safePercent >= start.pct && safePercent <= end.pct) {
-      const local = (safePercent - start.pct) / (end.pct - start.pct);
-      return {
-        x: start.x + (end.x - start.x) * local,
-        y: start.y + (end.y - start.y) * local
-      };
-    }
-  }
-  return points[points.length - 1];
+function formatClock(ms) {
+  return new Date(ms).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function formatDurationFromHours(hours) {
+  const totalMinutes = Math.round(hours * 60);
+  const wholeHours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (!wholeHours) return `+${minutes}m<br>est.`;
+  if (!minutes) return `+${wholeHours}h<br>est.`;
+  return `+${wholeHours}h ${minutes}m<br>est.`;
+}
+
+function sanitizeAirport(value) {
+  return String(value || "")
+    .replace(/[^a-z]/gi, "")
+    .slice(0, 3)
+    .toUpperCase();
 }
 
 function updateInputs() {
@@ -201,7 +261,20 @@ function updateInputs() {
   els.compoundInput.value = state.settings.compoundPortion;
   els.returnInput.value = state.settings.annualReturn;
   els.yearsInput.value = state.settings.years;
+  updateUnlockInputs();
   updatePlanPreview();
+}
+
+function updateUnlockInputs() {
+  const unlock = state.unlock;
+  els.unlockModeInput.value = unlock.mode;
+  els.targetPriceInput.value = unlock.targetPrice;
+  els.originInput.value = unlock.origin;
+  els.destinationInput.value = unlock.destination;
+  els.departureDateInput.value = unlock.departureDate;
+  els.fallbackItemInput.value = unlock.fallbackItem;
+  els.flightTokenInput.value = unlock.flightToken || "";
+  updateUnlockPreview();
 }
 
 function readDraftSettings() {
@@ -223,6 +296,97 @@ function updatePlanPreview() {
   els.goalPreview.textContent = `${Math.round(goalPercent)}% goal`;
 }
 
+function readUnlockInputs() {
+  const fallbackItem = els.fallbackItemInput.value || defaultUnlock().fallbackItem;
+  return {
+    ...state.unlock,
+    mode: els.unlockModeInput.value === "item" ? "item" : "flight",
+    origin: sanitizeAirport(els.originInput.value) || "DEN",
+    destination: sanitizeAirport(els.destinationInput.value) || "JFK",
+    departureDate: els.departureDateInput.value || defaultDepartureDate(),
+    targetPrice: Math.max(1, Number(els.targetPriceInput.value) || fallbackItemPrices[fallbackItem] || defaultUnlock().targetPrice),
+    fallbackItem,
+    flightToken: els.flightTokenInput.value.trim()
+  };
+}
+
+function openUnlockModal() {
+  updateUnlockInputs();
+  els.unlockStatus.textContent = state.unlock.lastChecked
+    ? `Last checked ${new Date(state.unlock.lastChecked).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}.`
+    : "No browser-safe free fare source is configured. The app will use your target fare unless a live source returns a price.";
+  els.unlockModal.hidden = false;
+}
+
+function closeUnlockModal() {
+  els.unlockModal.hidden = true;
+}
+
+function saveUnlockSettings() {
+  state.unlock = normalizeUnlock(readUnlockInputs());
+  saveState();
+  renderUnlock(currentEarned());
+  closeUnlockModal();
+}
+
+async function checkFlightFare() {
+  state.unlock = normalizeUnlock(readUnlockInputs());
+  saveState();
+
+  if (state.unlock.mode !== "flight") {
+    els.unlockStatus.textContent = "Fallback item saved. Switch to Flight to check fares.";
+    renderUnlock(currentEarned());
+    return;
+  }
+
+  if (!state.unlock.flightToken) {
+    state.unlock.lastPrice = null;
+    state.unlock.source = "Target fare";
+    state.unlock.lastChecked = new Date().toISOString();
+    saveState();
+    els.unlockStatus.textContent = "No free no-key flight price API is available in the browser, so this uses your target fare. Add a Travelpayouts token to try live fare data.";
+    renderUnlock(currentEarned());
+    return;
+  }
+
+  els.unlockStatus.textContent = `Checking ${state.unlock.origin} to ${state.unlock.destination} fares...`;
+  try {
+    const params = new URLSearchParams({
+      origin: state.unlock.origin,
+      destination: state.unlock.destination,
+      departure_at: state.unlock.departureDate,
+      currency: "usd",
+      limit: "1",
+      token: state.unlock.flightToken
+    });
+    const response = await fetch(`https://api.travelpayouts.com/aviasales/v3/prices_for_dates?${params.toString()}`);
+    if (!response.ok) throw new Error(`Fare source returned ${response.status}`);
+    const data = await response.json();
+    const result = Array.isArray(data.data) ? data.data[0] : null;
+    const livePrice = Number(result?.price);
+    if (!Number.isFinite(livePrice) || livePrice <= 0) throw new Error("No fare returned for that route/date");
+    state.unlock.lastPrice = Math.round(livePrice);
+    state.unlock.source = "Live fare";
+    state.unlock.lastChecked = new Date().toISOString();
+    els.unlockStatus.textContent = `Live fare found: ${dollars.format(state.unlock.lastPrice)}.`;
+  } catch (error) {
+    state.unlock.lastPrice = null;
+    state.unlock.source = "Target fare";
+    state.unlock.lastChecked = new Date().toISOString();
+    els.unlockStatus.textContent = "Live fare check did not return a browser-usable price. Using your target fare fallback.";
+  }
+  saveState();
+  renderUnlock(currentEarned());
+}
+
+function maybePollFlightFare() {
+  if (state.unlock.mode !== "flight" || !state.unlock.flightToken) return;
+  const lastChecked = state.unlock.lastChecked ? Date.parse(state.unlock.lastChecked) : 0;
+  if (Date.now() - lastChecked > 15 * 60 * 1000) {
+    checkFlightFare();
+  }
+}
+
 function updateLive() {
   const now = Date.now();
   const session = getSession(now);
@@ -233,7 +397,7 @@ function updateLive() {
   const elapsed = sessionElapsedMs(session, now);
   const remainingSessionMs = Math.max(0, session.durationMs - elapsed);
   const timeProgress = clamp((elapsed / session.durationMs) * 100, 0, 100);
-  const remainingPlanned = Math.max(0, planned - earned);
+  const projectedEod = Math.max(earned, earned + (state.settings.hourlyRate / 3600000) * remainingSessionMs);
   const compoundBase = earned * (state.settings.compoundPortion / 100);
   const compoundMultiplier = Math.pow(1 + state.settings.annualReturn / 100, state.settings.years);
   const compounded = compoundBase * compoundMultiplier;
@@ -248,22 +412,23 @@ function updateLive() {
   els.percentToGoal.textContent = `${Math.round(goalProgress)}%`;
   els.goalLabel.textContent = dollars.format(state.settings.goal);
   setLineProgress(els.goalLine, Math.max(goalProgress, 2));
-  els.questPercent.textContent = `${Math.round(questProgress)}%`;
+  els.projectedEod.textContent = dollars.format(projectedEod);
   els.plannedTodayLabel.textContent = dollars.format(planned);
   els.stageEarned.textContent = dollars.format(earned);
   els.stagePlanned.textContent = dollars.format(planned);
-  setQuestProgress(Math.max(questProgress, 2));
+  setWorkdayProgress(Math.max(questProgress, 2));
+  els.workdayStartLabel.textContent = formatClock(session.startedAt);
+  els.workdayEndLabel.textContent = formatClock(session.startedAt + session.durationMs);
   els.timeLeft.textContent = formatHours(remainingSessionMs);
   els.timeProgress.style.width = `${timeProgress}%`;
-  els.remainingAmount.textContent = dollars.format(remainingPlanned);
-  els.remainingProgress.style.width = `${questProgress}%`;
   els.compoundPercent.textContent = `${state.settings.compoundPortion}%`;
   els.compoundValue.textContent = dollars.format(compounded);
   els.returnLabel.textContent = `${state.settings.annualReturn}%`;
   els.yearsLabel.textContent = state.settings.years;
   els.pauseButton.textContent = session.paused ? "Resume" : "Pause";
 
-  renderCheckpointRail(questProgress);
+  renderMilestones(questProgress);
+  renderUnlock(earned);
   renderHome(earned);
   renderStats();
 }
@@ -278,10 +443,56 @@ function checkpoints() {
   ];
 }
 
-function renderCheckpointRail(questProgress) {
-  els.checkpointRail.innerHTML = checkpoints()
-    .map((point, index) => `<div class="path-node n${index + 1} ${questProgress >= point.pct ? "done" : ""}">${point.pct}</div>`)
+function renderMilestones(questProgress) {
+  els.milestoneRow.innerHTML = checkpoints()
+    .map((point) => {
+      const left = point.pct === 100 ? 100 : point.pct;
+      const hoursAtPoint = state.settings.durationHours * (point.pct / 100);
+      return `
+        <div class="milestone ${questProgress >= point.pct ? "done" : ""} ${point.pct === 100 ? "finish" : ""}" style="--x:${left}%">
+          <b>${dollars.format(point.amount)}</b>
+          <span>${point.pct}%</span>
+          <em>${point.pct === 100 ? "" : formatDurationFromHours(hoursAtPoint)}</em>
+        </div>
+      `;
+    })
     .join("");
+}
+
+function unlockPrice() {
+  const unlock = state.unlock;
+  if (unlock.mode === "item") return fallbackItemPrices[unlock.fallbackItem] || unlock.targetPrice;
+  return unlock.lastPrice || unlock.targetPrice;
+}
+
+function unlockLabel() {
+  const unlock = state.unlock;
+  if (unlock.mode === "item") return unlock.fallbackItem;
+  return `${unlock.origin} → ${unlock.destination}`;
+}
+
+function renderUnlock(earned) {
+  const price = Math.max(1, unlockPrice());
+  const away = Math.max(0, price - earned);
+  const minutesLeft = state.settings.hourlyRate > 0 ? Math.ceil((away / state.settings.hourlyRate) * 60) : Infinity;
+  const progress = clamp((earned / price) * 100, 0, 100);
+  const source = state.unlock.mode === "flight" ? state.unlock.source : "Fallback item";
+  els.unlockTitle.textContent = unlockLabel();
+  els.unlockMeta.textContent = away <= 0
+    ? `${dollars.format(price)} unlocked · ${source}`
+    : `${dollars.format(away)} away · ${Number.isFinite(minutesLeft) ? `${minutesLeft} min left` : "rate needed"}`;
+  els.unlockProgress.style.width = `${Math.max(progress, 2)}%`;
+  updateUnlockPreview();
+}
+
+function updateUnlockPreview() {
+  const unlock = state.unlock;
+  const price = Math.max(1, unlockPrice());
+  els.unlockPreviewType.textContent = unlock.mode === "flight" ? "Flight to unlock" : "Fallback item";
+  els.unlockPreviewRoute.textContent = unlockLabel();
+  els.unlockPreviewPrice.textContent = unlock.mode === "flight"
+    ? `${dollars.format(price)} ${unlock.source.toLowerCase()}`
+    : `${dollars.format(price)} unlock target`;
 }
 
 function sortedHistoryEntries() {
@@ -440,14 +651,36 @@ els.tabButtons.forEach((button) => {
   input.addEventListener("input", updatePlanPreview);
 });
 
+[
+  els.unlockModeInput,
+  els.targetPriceInput,
+  els.originInput,
+  els.destinationInput,
+  els.departureDateInput,
+  els.fallbackItemInput,
+  els.flightTokenInput
+].forEach((input) => {
+  input.addEventListener("input", () => {
+    state.unlock = normalizeUnlock(readUnlockInputs());
+    updateUnlockPreview();
+  });
+});
+
 els.startButton.addEventListener("click", startToday);
 els.pauseButton.addEventListener("click", togglePause);
 els.resetDayButton.addEventListener("click", resetToday);
 els.clearHistoryButton.addEventListener("click", clearHistory);
+els.unlockCard.addEventListener("click", openUnlockModal);
+els.unlockBackdrop.addEventListener("click", closeUnlockModal);
+els.closeUnlockButton.addEventListener("click", closeUnlockModal);
+els.saveUnlockButton.addEventListener("click", saveUnlockSettings);
+els.checkFareButton.addEventListener("click", checkFlightFare);
 
 updateInputs();
 updateLive();
 setInterval(updateLive, 1000);
+setInterval(maybePollFlightFare, 15 * 60 * 1000);
+maybePollFlightFare();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {

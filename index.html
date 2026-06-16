@@ -193,42 +193,52 @@
         font-weight: 860;
       }
 
-      .journey-svg {
+      .level-board {
         position: absolute;
-        inset: 68px 0 0;
-        width: 100%;
-        height: calc(100% - 54px);
+        z-index: 2;
+        left: 18px;
+        right: 18px;
+        bottom: 18px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
       }
 
-      .trail {
-        stroke-dasharray: 12 10;
-        animation: trailMove 3s linear infinite;
-        filter: drop-shadow(0 3px 5px rgba(9, 168, 95, 0.25));
+      .level-tile {
+        min-height: 82px;
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 7px;
+        border: 1px solid rgba(9, 168, 95, 0.18);
+        border-radius: 22px;
+        color: #102017;
+        background: rgba(255, 255, 255, 0.68);
+        box-shadow: 0 14px 28px rgba(8, 68, 38, 0.08);
       }
 
-      .checkpoint {
-        position: absolute;
-        z-index: 3;
+      .level-tile strong {
         width: 38px;
         height: 38px;
         display: grid;
         place-items: center;
         border-radius: 50%;
-        color: #07120f;
+        color: #06351e;
         background: var(--lime);
-        box-shadow: 0 10px 18px rgba(9, 168, 95, 0.18);
-        font-size: 12px;
-        font-weight: 900;
+        font-size: 15px;
+        font-weight: 920;
       }
 
-      .checkpoint.done {
-        background: #ffffff;
-        color: var(--green-dark);
+      .level-tile span {
+        color: rgba(16, 32, 23, 0.64);
+        font-size: 11px;
+        font-weight: 860;
       }
 
-      .checkpoint.cp1 { left: 15%; bottom: 22%; }
-      .checkpoint.cp2 { left: 44%; bottom: 40%; }
-      .checkpoint.cp3 { right: 16%; bottom: 61%; }
+      .level-tile.locked strong {
+        color: #5e6d62;
+        background: #e6f0e9;
+      }
 
       .home-actions {
         display: grid;
@@ -306,6 +316,70 @@
         font-size: 24px;
         line-height: 1;
         font-variant-numeric: tabular-nums;
+      }
+
+      .unlock-card {
+        position: relative;
+        min-height: 112px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: center;
+        padding: 13px;
+        border: 1px solid rgba(9, 168, 95, 0.18);
+        border-radius: 16px;
+        color: var(--ink);
+        text-align: left;
+        background:
+          radial-gradient(circle at 88% 10%, rgba(128, 239, 104, 0.34), transparent 34%),
+          rgba(255, 255, 255, 0.88);
+      }
+
+      .unlock-card:active {
+        transform: translateY(1px);
+      }
+
+      .unlock-card span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 840;
+      }
+
+      .unlock-card strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 20px;
+        line-height: 1;
+        font-weight: 900;
+      }
+
+      .unlock-card em {
+        display: block;
+        margin-top: 5px;
+        color: #07864d;
+        font-style: normal;
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      .unlock-icon {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #06351e;
+        background: var(--lime);
+      }
+
+      .unlock-icon svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .unlock-card .progress-line {
+        grid-column: 1 / -1;
+        height: 8px;
       }
 
       .section-title {
@@ -430,146 +504,257 @@
         transition: left 280ms ease;
       }
 
-      .quest-stage {
+      .workday-stage {
         position: relative;
-        min-height: 286px;
-        padding: 16px;
+        min-height: 300px;
+        padding: 18px 15px 16px;
         overflow: hidden;
-        border: 1px solid rgba(7, 164, 93, 0.12);
-        border-radius: 24px;
+        border-radius: 26px;
+        color: #ffffff;
         background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(225, 249, 235, 0.94)),
-          #ffffff;
+          radial-gradient(circle at 7% 78%, rgba(111, 255, 143, 0.52), transparent 19%),
+          radial-gradient(circle at 71% 22%, rgba(122, 236, 255, 0.28), transparent 27%),
+          radial-gradient(circle at 32% 94%, rgba(12, 31, 78, 0.62), transparent 38%),
+          linear-gradient(135deg, #205a96 0%, #177875 48%, #173e61 100%);
+        box-shadow: 0 24px 50px rgba(25, 88, 98, 0.22);
+        isolation: isolate;
       }
 
-      .stage-top {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 12px;
+      .workday-stage::before,
+      .workday-stage::after {
+        content: "";
+        position: absolute;
+        inset: auto;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .workday-stage::before {
+        width: 240px;
+        height: 240px;
+        left: -86px;
+        bottom: -98px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow:
+          0 0 0 22px rgba(255,255,255,.05),
+          0 0 0 48px rgba(255,255,255,.035),
+          0 0 0 80px rgba(255,255,255,.02);
+      }
+
+      .workday-stage::after {
+        width: 210px;
+        height: 210px;
+        right: -46px;
+        top: -30px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 62%);
+      }
+
+      .workday-title {
         position: relative;
         z-index: 2;
-      }
-
-      .stage-top span {
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 820;
-      }
-
-      .stage-top strong {
-        color: #087848;
-        font-size: 15px;
+        max-width: 212px;
+        font-size: 14px;
         font-weight: 880;
       }
 
-      .quest-map {
-        position: absolute;
-        left: 14px;
-        right: 14px;
-        top: 56px;
-        bottom: 40px;
-        width: calc(100% - 28px);
-        height: calc(100% - 96px);
-      }
-
-      .route-base,
-      .route-fill {
-        fill: none;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-      }
-
-      .route-base {
-        stroke: #cde5d4;
-        stroke-width: 18;
-      }
-
-      .route-fill {
-        stroke: var(--green);
-        stroke-width: 18;
-        stroke-dasharray: 430;
-        stroke-dashoffset: var(--route-offset, 430);
-        filter: drop-shadow(0 7px 10px rgba(9, 168, 95, 0.22));
-        transition: stroke-dashoffset 300ms ease;
-      }
-
-      .map-tile {
-        fill: rgba(255,255,255,.72);
-        stroke: rgba(9,168,95,.14);
-        stroke-width: 2;
-      }
-
-      .route-avatar {
+      .eod-card {
         position: absolute;
         z-index: 3;
-        left: var(--avatar-x, 7%);
-        top: var(--avatar-y, 79%);
-        width: 34px;
-        height: 34px;
-        display: grid;
-        place-items: center;
-        transform: translate(-50%, -50%);
-        border: 4px solid #ffffff;
-        border-radius: 50%;
-        color: #062613;
-        background: var(--lime);
-        box-shadow: 0 12px 20px rgba(9, 168, 95, 0.24);
-        font-size: 15px;
-        font-weight: 900;
-        transition: left 300ms ease, top 300ms ease;
+        top: 14px;
+        right: 14px;
+        width: 128px;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.44);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.16);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 12px 28px rgba(0,0,0,.13);
+        backdrop-filter: blur(14px);
       }
 
-      .path-node {
+      .eod-card > span {
+        display: block;
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .eod-card strong {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 4px;
+        color: #72ff86;
+        font-size: 24px;
+        line-height: 1;
+        font-weight: 920;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .eod-card strong span {
+        color: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+      }
+
+      .eod-card em {
+        display: block;
+        margin-top: 5px;
+        color: rgba(255, 255, 255, 0.82);
+        font-style: normal;
+        font-size: 11px;
+        font-weight: 760;
+      }
+
+      .eod-card svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .beam-wrap {
         position: absolute;
         z-index: 2;
+        left: 25px;
+        right: 25px;
+        bottom: 88px;
+        height: 54px;
+      }
+
+      .beam-track {
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        top: 23px;
+        height: 12px;
+        border-radius: 999px;
+        background: repeating-linear-gradient(90deg, rgba(255,255,255,.82) 0 12px, transparent 12px 24px);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+      }
+
+      .beam-track i {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: var(--value, 0%);
+        border-radius: inherit;
+        background: linear-gradient(90deg, #78ff7d 0%, #46e877 55%, #b7ffc5 100%);
+        box-shadow: 0 0 22px rgba(101, 255, 119, 0.58);
+        transition: width 300ms ease;
+      }
+
+      .beam-start,
+      .beam-finish {
+        position: absolute;
+        z-index: 4;
+        top: 6px;
+        width: 45px;
+        height: 45px;
+        display: grid;
+        place-items: center;
+        border: 4px solid rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.16);
+        box-shadow: 0 0 0 12px rgba(111, 255, 143, 0.14), 0 0 30px rgba(111, 255, 143, 0.5);
+      }
+
+      .beam-start {
+        left: 0;
+      }
+
+      .beam-start span {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #75ff82;
+        box-shadow: inset 0 -4px 0 rgba(6, 111, 55, 0.24);
+      }
+
+      .beam-finish {
+        right: 0;
+        color: #ffffff;
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.14), 0 0 22px rgba(255,255,255,.36);
+      }
+
+      .beam-finish svg {
+        width: 23px;
+        height: 23px;
+      }
+
+      .milestone-row {
+        position: absolute;
+        z-index: 5;
+        inset: 0 42px 0 42px;
+      }
+
+      .milestone {
+        position: absolute;
+        left: var(--x);
+        top: 0;
+        width: 58px;
+        transform: translateX(-50%);
+        text-align: center;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .milestone b {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 11px;
+        font-weight: 880;
+      }
+
+      .milestone span {
         width: 32px;
         height: 32px;
         display: grid;
         place-items: center;
-        transform: translate(-50%, -50%);
-        border: 3px solid #ffffff;
+        margin: 0 auto;
+        border: 3px solid rgba(255, 255, 255, 0.88);
         border-radius: 50%;
-        color: #6f7e73;
-        background: #dcece2;
-        box-shadow: 0 8px 14px rgba(9, 168, 95, 0.12);
+        color: rgba(255, 255, 255, 0.88);
+        background: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 8px 16px rgba(0,0,0,.12);
+        font-size: 10px;
+        font-weight: 900;
+      }
+
+      .milestone.done span {
+        color: #0d3a22;
+        background: #76ff83;
+      }
+
+      .milestone.finish {
+        top: -54px;
+      }
+
+      .milestone em {
+        display: block;
+        margin-top: 13px;
+        color: rgba(255, 255, 255, 0.82);
+        font-style: normal;
+        font-size: 10px;
+        line-height: 1.25;
+        font-weight: 760;
+      }
+
+      .stage-captions {
+        position: absolute;
+        z-index: 3;
+        left: 25px;
+        right: 25px;
+        bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        color: rgba(255, 255, 255, 0.86);
         font-size: 11px;
-        font-weight: 900;
+        line-height: 1.35;
+        font-weight: 820;
       }
 
-      .path-node.done {
-        color: #06351e;
-        background: var(--lime);
+      .stage-captions > span {
+        max-width: 112px;
       }
 
-      .path-node.n1 { left: 16%; top: 72%; }
-      .path-node.n2 { left: 36%; top: 53%; }
-      .path-node.n3 { left: 62%; top: 42%; }
-      .path-node.n4 { left: 82%; top: 23%; }
-
-      .quest-labels {
-        position: absolute;
-        z-index: 2;
-        left: 28px;
-        right: 28px;
-        bottom: 38px;
-        display: flex;
-        justify-content: space-between;
-        color: #08633c;
-        font-size: 13px;
-        font-weight: 900;
-      }
-
-      .quest-caption {
-        position: absolute;
-        left: 28px;
-        right: 28px;
-        bottom: 14px;
-        display: flex;
-        justify-content: space-between;
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 830;
+      .stage-captions > span:last-child {
+        text-align: right;
       }
 
       .compound-card {
@@ -775,6 +960,121 @@
         line-height: 1.4;
       }
 
+      .unlock-modal[hidden] {
+        display: none;
+      }
+
+      .unlock-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        display: grid;
+        align-items: end;
+      }
+
+      .modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(4, 15, 9, 0.34);
+        backdrop-filter: blur(8px);
+      }
+
+      .unlock-sheet {
+        position: relative;
+        z-index: 1;
+        width: min(100%, 430px);
+        max-height: min(88vh, 760px);
+        margin: 0 auto;
+        overflow: auto;
+        padding: 18px 18px calc(env(safe-area-inset-bottom, 0px) + 18px);
+        border-radius: 28px 28px 0 0;
+        background: #f7fbf5;
+        box-shadow: 0 -28px 70px rgba(0, 0, 0, 0.22);
+      }
+
+      .sheet-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .sheet-head h2 {
+        margin: 0;
+        font-size: 25px;
+        line-height: 1;
+      }
+
+      .sheet-head p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+        font-weight: 720;
+      }
+
+      .sheet-close {
+        width: 38px;
+        height: 38px;
+        border: 0;
+        border-radius: 50%;
+        color: var(--ink);
+        background: #e6f0e9;
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      .unlock-preview {
+        margin: 0 0 12px;
+        padding: 13px;
+        border: 1px solid rgba(9, 168, 95, 0.18);
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 88% 10%, rgba(128, 239, 104, 0.34), transparent 32%),
+          #ffffff;
+      }
+
+      .unlock-preview strong {
+        display: block;
+        font-size: 26px;
+      }
+
+      .unlock-preview span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 820;
+      }
+
+      .setting-card select {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #cfe1d5;
+        border-radius: 12px;
+        padding: 0 12px;
+        color: var(--ink);
+        background: #ffffff;
+        font-size: 15px;
+        font-weight: 780;
+        outline: none;
+      }
+
+      .sheet-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .unlock-status {
+        min-height: 20px;
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.35;
+        font-weight: 780;
+      }
+
       .tabbar {
         position: sticky;
         bottom: 0;
@@ -888,16 +1188,11 @@
               </div>
               <div class="streak-pill"><span id="homeStreak">0</span> day streak</div>
             </div>
-            <svg class="journey-svg" viewBox="0 0 390 280" preserveAspectRatio="none" aria-hidden="true">
-              <rect x="18" y="154" width="76" height="48" rx="18" fill="rgba(255,255,255,.68)" stroke="rgba(9,168,95,.15)" stroke-width="2"/>
-              <rect x="252" y="34" width="82" height="54" rx="20" fill="rgba(255,255,255,.66)" stroke="rgba(9,168,95,.15)" stroke-width="2"/>
-              <rect x="78" y="72" width="72" height="48" rx="18" fill="rgba(255,255,255,.56)" stroke="rgba(9,168,95,.12)" stroke-width="2"/>
-              <path class="trail" d="M60 218 C70 174, 128 194, 146 150 S198 132, 205 98 S260 90, 300 52" fill="none" stroke="#09a85f" stroke-width="13" stroke-linecap="round"/>
-              <path d="M60 218 C70 174, 128 194, 146 150 S198 132, 205 98 S260 90, 300 52" fill="none" stroke="#effff3" stroke-width="4" stroke-linecap="round" opacity=".9"/>
-            </svg>
-            <span class="checkpoint done cp1">1</span>
-            <span class="checkpoint cp2">2</span>
-            <span class="checkpoint cp3">3</span>
+            <div class="level-board" aria-hidden="true">
+              <div class="level-tile"><strong>1</strong><span>Warmup</span></div>
+              <div class="level-tile locked"><strong>2</strong><span>Cruise</span></div>
+              <div class="level-tile locked"><strong>3</strong><span>Finish</span></div>
+            </div>
           </section>
 
           <div class="home-actions">
@@ -926,27 +1221,24 @@
             <div class="progress-line" id="goalLine"><i></i><b class="pin"></b></div>
           </section>
 
-          <section class="quest-stage" id="questStage" aria-label="Planned workday checkpoint path">
-            <div class="stage-top">
-              <span>Planned today</span>
-              <strong><span id="questPercent">0%</span> of <span id="plannedTodayLabel">$0</span></strong>
+          <section class="workday-stage" id="workdayStage" aria-label="Progress to end of workday">
+            <div class="workday-title">Progress to end of workday</div>
+            <div class="eod-card">
+              <span>Projected EOD</span>
+              <strong><span id="projectedEod">$0</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 17 9 12l4 4 7-9M15 7h5v5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></strong>
+              <em>of <span id="plannedTodayLabel">$0</span> planned</em>
             </div>
-            <svg class="quest-map" viewBox="0 0 320 210" preserveAspectRatio="none" aria-hidden="true">
-              <rect class="map-tile" x="18" y="136" width="64" height="42" rx="16"/>
-              <rect class="map-tile" x="126" y="104" width="68" height="44" rx="16"/>
-              <rect class="map-tile" x="228" y="36" width="70" height="48" rx="18"/>
-              <path class="route-base" d="M34 176 C48 126, 94 154, 116 112 S178 104, 192 72 S252 70, 286 30"/>
-              <path class="route-fill" d="M34 176 C48 126, 94 154, 116 112 S178 104, 192 72 S252 70, 286 30"/>
-            </svg>
-            <div id="checkpointRail"></div>
-            <div class="route-avatar" id="routeAvatar" aria-hidden="true">$</div>
-            <div class="quest-labels">
-              <span id="stageEarned">$0</span>
-              <span id="stagePlanned">$0</span>
+            <div class="beam-wrap">
+              <div class="beam-start" aria-hidden="true"><span></span></div>
+              <div class="beam-track" id="workdayBeam"><i></i></div>
+              <div class="beam-finish" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M6 21V4m0 1h10l-2 4 2 4H6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="milestone-row" id="milestoneRow"></div>
             </div>
-            <div class="quest-caption">
-              <span>Now</span>
-              <span>End of workday</span>
+            <div class="stage-captions">
+              <span><strong id="stageEarned">$0</strong><br><span id="workdayStartLabel">Start</span></span>
+              <span><strong id="stagePlanned">$0</strong><br>End of workday<br><span id="workdayEndLabel">--</span></span>
             </div>
           </section>
 
@@ -956,11 +1248,17 @@
               <strong id="timeLeft">0h 00m</strong>
               <div class="progress-line"><i id="timeProgress"></i></div>
             </div>
-            <div class="metric">
-              <span>Remaining plan</span>
-              <strong id="remainingAmount">$0</strong>
-              <div class="progress-line"><i id="remainingProgress"></i></div>
-            </div>
+            <button class="unlock-card" id="unlockCard" type="button" aria-label="Choose next unlock">
+              <div>
+                <span>Next unlock</span>
+                <strong id="unlockTitle">Flight</strong>
+                <em id="unlockMeta">$0 away · -- left</em>
+              </div>
+              <div class="unlock-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M3 16.5 21 4l-5.2 16-4.1-6.3L3 16.5Zm8.7-2.8L21 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="progress-line"><i id="unlockProgress"></i></div>
+            </button>
           </section>
 
           <section class="compound-card" aria-label="Compounding projection">
@@ -983,7 +1281,7 @@
         <section class="view" id="startView" aria-label="Start workday">
           <section class="start-card card">
             <h1>Start Workday</h1>
-            <p>Set the plan like starting a workout. The live path advances through checkpoints toward what this session should make by the end.</p>
+            <p>Set the plan like starting a workout. The live progress beam advances through checkpoints toward what this session should make by the end.</p>
             <div class="modern-row">
               <span class="round-icon">$</span>
               <div><strong>Projected today</strong><span id="projectedPreview">$0 from this plan</span></div>
@@ -1040,8 +1338,70 @@
           Stats
         </button>
       </nav>
+
+      <div class="unlock-modal" id="unlockModal" hidden>
+        <div class="modal-backdrop" id="unlockBackdrop"></div>
+        <section class="unlock-sheet" role="dialog" aria-modal="true" aria-labelledby="unlockSheetTitle">
+          <div class="sheet-head">
+            <div>
+              <h2 id="unlockSheetTitle">Next unlock</h2>
+              <p>Pick a flight route or a fallback item. Your live earnings count down to the unlock price.</p>
+            </div>
+            <button class="sheet-close" id="closeUnlockButton" type="button" aria-label="Close unlock settings">×</button>
+          </div>
+
+          <div class="unlock-preview">
+            <span id="unlockPreviewType">Flight to unlock</span>
+            <strong id="unlockPreviewRoute">DEN → JFK</strong>
+            <span id="unlockPreviewPrice">$280 target fare</span>
+          </div>
+
+          <div class="settings-grid">
+            <label class="setting-card">Unlock type
+              <select id="unlockModeInput">
+                <option value="flight">Flight</option>
+                <option value="item">Fallback item</option>
+              </select>
+            </label>
+            <label class="setting-card">Target price<input id="targetPriceInput" inputmode="decimal" type="number" min="1" step="1" /></label>
+            <label class="setting-card">Departing airport<input id="originInput" list="airportList" maxlength="3" autocapitalize="characters" /></label>
+            <label class="setting-card">Arrival airport<input id="destinationInput" list="airportList" maxlength="3" autocapitalize="characters" /></label>
+            <label class="setting-card">Depart date<input id="departureDateInput" type="date" /></label>
+            <label class="setting-card">Fallback item
+              <select id="fallbackItemInput">
+                <option value="Coffee paid off">Coffee paid off</option>
+                <option value="Lunch covered">Lunch covered</option>
+                <option value="Gas covered">Gas covered</option>
+                <option value="Dinner covered">Dinner covered</option>
+                <option value="Weekend fund">Weekend fund</option>
+              </select>
+            </label>
+          </div>
+          <label class="setting-card" style="margin-top:10px">Live fare token <input id="flightTokenInput" type="password" autocomplete="off" placeholder="Optional Travelpayouts token" /></label>
+          <div class="sheet-actions">
+            <button class="secondary-button" id="checkFareButton" type="button">Check Fare</button>
+            <button class="primary-button" id="saveUnlockButton" type="button">Save Unlock</button>
+          </div>
+          <p class="unlock-status" id="unlockStatus">No browser-safe free fare source is configured. The app will use your target fare unless a live source returns a price.</p>
+        </section>
+      </div>
+
+      <datalist id="airportList">
+        <option value="DEN">Denver</option>
+        <option value="JFK">New York JFK</option>
+        <option value="LGA">New York LaGuardia</option>
+        <option value="EWR">Newark</option>
+        <option value="LAX">Los Angeles</option>
+        <option value="SFO">San Francisco</option>
+        <option value="SEA">Seattle</option>
+        <option value="ORD">Chicago O'Hare</option>
+        <option value="AUS">Austin</option>
+        <option value="MIA">Miami</option>
+        <option value="BOS">Boston</option>
+        <option value="LAS">Las Vegas</option>
+      </datalist>
     </div>
 
-    <script src="./app.js" defer></script>
+    <script src="./app.js?v=7" defer></script>
   </body>
 </html>
