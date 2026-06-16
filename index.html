@@ -3,26 +3,29 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f7fbf6" />
+    <meta name="theme-color" content="#f7fbf5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Money Climb" />
+    <meta name="apple-mobile-web-app-title" content="Money Quest" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Money Climb</title>
+    <title>Money Quest</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icon-192.png" />
     <link rel="icon" href="./icon-192.png" />
     <style>
       :root {
-        --bg: #eef4ef;
+        --bg: #eef5ef;
         --surface: #ffffff;
-        --ink: #101711;
-        --muted: #66726a;
-        --line: #dbe8df;
-        --green: #07a45d;
-        --green-2: #74dc9b;
-        --green-3: #dff8e8;
-        --danger: #db563f;
-        --shadow: 0 22px 55px rgba(15, 25, 17, 0.13);
+        --surface-soft: #f6fbf7;
+        --ink: #101812;
+        --muted: #68756c;
+        --line: #d8e7dc;
+        --green: #09a85f;
+        --green-dark: #067444;
+        --lime: #80ef68;
+        --mint: #dff8e8;
+        --gold: #f1c84b;
+        --danger: #dc5b42;
+        --shadow: 0 24px 60px rgba(16, 28, 18, 0.13);
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
@@ -62,8 +65,8 @@
         display: flex;
         flex-direction: column;
         background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 249, 242, 0.96)),
-          #f7fbf6;
+          linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 250, 243, 0.96)),
+          #f7fbf5;
       }
 
       .app-header {
@@ -71,7 +74,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: calc(env(safe-area-inset-top, 0px) + 16px) 18px 10px;
+        padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 9px;
       }
 
       .icon-button {
@@ -81,11 +84,12 @@
         place-items: center;
         border: 0;
         border-radius: 50%;
-        color: #1b2a20;
-        background: rgba(20, 33, 24, 0.07);
+        color: #18251c;
+        background: rgba(18, 32, 22, 0.07);
       }
 
-      .icon-button svg {
+      .icon-button svg,
+      .tabbar svg {
         width: 20px;
         height: 20px;
       }
@@ -96,8 +100,8 @@
 
       .title-block strong {
         display: block;
-        font-size: 15px;
-        line-height: 1.15;
+        font-size: 16px;
+        line-height: 1.1;
       }
 
       .title-block span {
@@ -105,7 +109,7 @@
         margin-top: 3px;
         color: var(--muted);
         font-size: 12px;
-        font-weight: 720;
+        font-weight: 760;
       }
 
       main {
@@ -116,16 +120,216 @@
       .view {
         display: none;
         min-height: 0;
-        padding: 4px 18px 124px;
+        padding: 6px 18px 126px;
       }
 
       .view.active {
         display: block;
       }
 
+      .home-hero {
+        position: relative;
+        min-height: 310px;
+        overflow: hidden;
+        border: 1px solid rgba(9, 168, 95, 0.14);
+        border-radius: 26px;
+        background:
+          radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.9), transparent 22%),
+          radial-gradient(circle at 78% 12%, rgba(255, 255, 255, 0.74), transparent 20%),
+          linear-gradient(180deg, #e7fff0 0%, #d3f6df 54%, #bcebcf 100%);
+        box-shadow: var(--shadow);
+      }
+
+      .home-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.5;
+        background-image:
+          linear-gradient(90deg, rgba(9,168,95,.08) 1px, transparent 1px),
+          linear-gradient(rgba(9,168,95,.08) 1px, transparent 1px);
+        background-size: 34px 34px;
+      }
+
+      .journey-copy {
+        position: absolute;
+        z-index: 2;
+        top: 18px;
+        left: 18px;
+        right: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 14px;
+        color: #102017;
+      }
+
+      .journey-copy span {
+        color: rgba(16, 32, 23, 0.58);
+        font-size: 12px;
+        font-weight: 820;
+        letter-spacing: 0.08em;
+      }
+
+      .journey-copy h1 {
+        margin: 6px 0 0;
+        font-size: 32px;
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .streak-pill {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 34px;
+        padding: 0 12px;
+        border: 1px solid rgba(9, 168, 95, 0.18);
+        border-radius: 999px;
+        color: #06351e;
+        background: var(--lime);
+        font-size: 12px;
+        font-weight: 860;
+      }
+
+      .journey-svg {
+        position: absolute;
+        inset: 68px 0 0;
+        width: 100%;
+        height: calc(100% - 54px);
+      }
+
+      .trail {
+        stroke-dasharray: 12 10;
+        animation: trailMove 3s linear infinite;
+        filter: drop-shadow(0 3px 5px rgba(9, 168, 95, 0.25));
+      }
+
+      .checkpoint {
+        position: absolute;
+        z-index: 3;
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #07120f;
+        background: var(--lime);
+        box-shadow: 0 10px 18px rgba(9, 168, 95, 0.18);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .checkpoint.done {
+        background: #ffffff;
+        color: var(--green-dark);
+      }
+
+      .checkpoint.cp1 { left: 15%; bottom: 22%; }
+      .checkpoint.cp2 { left: 44%; bottom: 40%; }
+      .checkpoint.cp3 { right: 16%; bottom: 61%; }
+
+      .home-actions {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .primary-button,
+      .secondary-button,
+      .danger-button {
+        min-height: 56px;
+        border: 0;
+        border-radius: 15px;
+        font-size: 16px;
+        font-weight: 880;
+      }
+
+      .primary-button {
+        color: #ffffff;
+        background: var(--green);
+      }
+
+      .secondary-button {
+        color: var(--ink);
+        background: #e3eee7;
+      }
+
+      .danger-button {
+        color: #ffffff;
+        background: var(--danger);
+      }
+
+      .stat-grid,
+      .metrics,
+      .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .card,
+      .stat-card,
+      .metric,
+      .setting-card,
+      .checkpoint-card,
+      .compound-card,
+      .history-card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.82);
+      }
+
+      .stat-card,
+      .metric {
+        min-height: 76px;
+        display: grid;
+        align-content: center;
+        gap: 8px;
+        padding: 13px;
+      }
+
+      .label,
+      .stat-card span,
+      .metric span,
+      .setting-card label,
+      .compound-card span,
+      .history-card span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 820;
+      }
+
+      .stat-card strong,
+      .metric strong {
+        font-size: 24px;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 18px 0 10px;
+      }
+
+      .section-title h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .section-title span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 780;
+      }
+
       .hero-counter {
         text-align: center;
-        padding: 8px 0 10px;
+        padding: 2px 0 6px;
       }
 
       .live-pill {
@@ -153,7 +357,7 @@
       .earned {
         display: block;
         margin-top: 8px;
-        font-size: clamp(56px, 17vw, 76px);
+        font-size: clamp(48px, 15vw, 66px);
         line-height: 0.95;
         font-weight: 880;
         letter-spacing: 0;
@@ -167,16 +371,74 @@
         font-weight: 840;
       }
 
-      .goal-stage {
+      .goal-mini {
+        margin: 10px 0 10px;
+        display: grid;
+        gap: 8px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.82);
+      }
+
+      .goal-mini-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+      }
+
+      .goal-mini-row span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 820;
+      }
+
+      .goal-mini-row strong {
+        color: var(--green-dark);
+        font-size: 14px;
+      }
+
+      .progress-line {
+        position: relative;
+        height: 9px;
+        overflow: visible;
+        border-radius: 999px;
+        background: #d5e9dc;
+      }
+
+      .progress-line i {
+        display: block;
+        width: var(--value, 0%);
+        height: 100%;
+        border-radius: inherit;
+        background: var(--green);
+        transition: width 280ms ease;
+      }
+
+      .pin {
+        position: absolute;
+        top: 50%;
+        left: var(--value, 0%);
+        width: 18px;
+        height: 18px;
+        transform: translate(-50%, -50%);
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 4px 12px rgba(7, 164, 93, 0.28);
+        transition: left 280ms ease;
+      }
+
+      .quest-stage {
         position: relative;
         min-height: 286px;
-        margin-top: 4px;
-        padding: 15px;
+        padding: 16px;
         overflow: hidden;
         border: 1px solid rgba(7, 164, 93, 0.12);
-        border-radius: 16px;
+        border-radius: 24px;
         background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(225, 249, 235, 0.9)),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(225, 249, 235, 0.94)),
           #ffffff;
       }
 
@@ -201,181 +463,113 @@
         font-weight: 880;
       }
 
-      .amount-target {
+      .quest-map {
         position: absolute;
-        inset: auto 15px 64px;
-        height: 142px;
-        border: 2px solid rgba(7, 164, 93, 0.35);
-        border-radius: 18px 18px 24px 24px;
-        overflow: hidden;
-        background: rgba(217, 250, 231, 0.72);
+        left: 14px;
+        right: 14px;
+        top: 56px;
+        bottom: 40px;
+        width: calc(100% - 28px);
+        height: calc(100% - 96px);
       }
 
-      .amount-target::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: var(--goal-progress, 0%);
-        border-radius: 15px 15px 0 0;
-        background:
-          linear-gradient(90deg, rgba(7, 164, 93, 0.58), rgba(116, 220, 155, 0.78)),
-          var(--green-2);
-        transition: height 280ms ease;
+      .route-base,
+      .route-fill {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
 
-      .wave {
-        position: absolute;
-        left: -15%;
-        right: -15%;
-        bottom: calc(var(--goal-progress, 0%) - 9px);
-        height: 18px;
-        opacity: 0.7;
-        background:
-          radial-gradient(18px 12px at 18px 9px, rgba(255, 255, 255, 0.86) 45%, transparent 48%) 0 0 / 36px 18px repeat-x;
-        animation: waveMove 3.8s linear infinite;
-        transition: bottom 280ms ease;
+      .route-base {
+        stroke: #cde5d4;
+        stroke-width: 18;
       }
 
-      .target-labels {
+      .route-fill {
+        stroke: var(--green);
+        stroke-width: 18;
+        stroke-dasharray: 430;
+        stroke-dashoffset: var(--route-offset, 430);
+        filter: drop-shadow(0 7px 10px rgba(9, 168, 95, 0.22));
+        transition: stroke-dashoffset 300ms ease;
+      }
+
+      .map-tile {
+        fill: rgba(255,255,255,.72);
+        stroke: rgba(9,168,95,.14);
+        stroke-width: 2;
+      }
+
+      .route-avatar {
+        position: absolute;
+        z-index: 3;
+        left: var(--avatar-x, 7%);
+        top: var(--avatar-y, 79%);
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        transform: translate(-50%, -50%);
+        border: 4px solid #ffffff;
+        border-radius: 50%;
+        color: #062613;
+        background: var(--lime);
+        box-shadow: 0 12px 20px rgba(9, 168, 95, 0.24);
+        font-size: 15px;
+        font-weight: 900;
+        transition: left 300ms ease, top 300ms ease;
+      }
+
+      .path-node {
         position: absolute;
         z-index: 2;
-        left: 16px;
-        right: 16px;
-        bottom: 15px;
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        transform: translate(-50%, -50%);
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        color: #6f7e73;
+        background: #dcece2;
+        box-shadow: 0 8px 14px rgba(9, 168, 95, 0.12);
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .path-node.done {
+        color: #06351e;
+        background: var(--lime);
+      }
+
+      .path-node.n1 { left: 16%; top: 72%; }
+      .path-node.n2 { left: 36%; top: 53%; }
+      .path-node.n3 { left: 62%; top: 42%; }
+      .path-node.n4 { left: 82%; top: 23%; }
+
+      .quest-labels {
+        position: absolute;
+        z-index: 2;
+        left: 28px;
+        right: 28px;
+        bottom: 38px;
         display: flex;
         justify-content: space-between;
         color: #08633c;
         font-size: 13px;
-        font-weight: 880;
+        font-weight: 900;
       }
 
-      .goal-ruler {
+      .quest-caption {
         position: absolute;
-        left: 15px;
-        right: 15px;
-        bottom: 26px;
-        display: grid;
-        gap: 7px;
-      }
-
-      .progress-line {
-        position: relative;
-        height: 9px;
-        overflow: visible;
-        border-radius: 999px;
-        background: #d5e9dc;
-      }
-
-      .progress-line i {
-        display: block;
-        width: var(--goal-progress, 0%);
-        height: 100%;
-        border-radius: inherit;
-        background: var(--green);
-        transition: width 280ms ease;
-      }
-
-      .pin {
-        position: absolute;
-        top: 50%;
-        left: var(--goal-progress, 0%);
-        width: 18px;
-        height: 18px;
-        transform: translate(-50%, -50%);
-        border: 3px solid #ffffff;
-        border-radius: 50%;
-        background: var(--green);
-        box-shadow: 0 4px 12px rgba(7, 164, 93, 0.28);
-        transition: left 280ms ease;
-      }
-
-      .ruler-labels {
+        left: 28px;
+        right: 28px;
+        bottom: 14px;
         display: flex;
         justify-content: space-between;
         color: var(--muted);
-        font-size: 11px;
-        font-weight: 800;
-      }
-
-      .history-strip {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 6px;
-        margin-top: 12px;
-        padding: 12px;
-        border: 1px solid var(--line);
-        border-radius: 13px;
-        background: rgba(255, 255, 255, 0.76);
-      }
-
-      .day-bar {
-        min-width: 0;
-        display: grid;
-        align-content: end;
-        justify-items: center;
-        gap: 5px;
-        height: 64px;
-        color: #728077;
-        font-size: 10px;
-        font-weight: 840;
-      }
-
-      .day-bar i {
-        width: 100%;
-        min-height: 5px;
-        height: var(--bar, 8%);
-        border-radius: 9px 9px 4px 4px;
-        background: rgba(7, 164, 93, 0.2);
-      }
-
-      .day-bar.today {
-        color: #086f43;
-      }
-
-      .day-bar.today i {
-        background: var(--green);
-        box-shadow: 0 0 16px rgba(7, 164, 93, 0.22);
-      }
-
-      .metrics {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 12px;
-      }
-
-      .metric,
-      .compound-card,
-      .history-card,
-      .settings-card {
-        border: 1px solid var(--line);
-        border-radius: 13px;
-        background: rgba(255, 255, 255, 0.78);
-      }
-
-      .metric {
-        min-height: 78px;
-        display: grid;
-        gap: 8px;
-        align-content: center;
-        padding: 12px;
-      }
-
-      .metric span,
-      .compound-card span,
-      .history-card span,
-      .settings-card label {
-        color: var(--muted);
         font-size: 12px;
-        font-weight: 820;
-      }
-
-      .metric strong {
-        display: block;
-        font-size: 24px;
-        line-height: 1;
+        font-weight: 830;
       }
 
       .compound-card {
@@ -413,62 +607,6 @@
         font-weight: 760;
       }
 
-      .session-card {
-        display: grid;
-        gap: 12px;
-        padding: 20px 0 0;
-      }
-
-      .settings-card {
-        display: grid;
-        gap: 8px;
-        padding: 13px;
-      }
-
-      .settings-card input {
-        width: 100%;
-        height: 46px;
-        border: 1px solid #cfe1d5;
-        border-radius: 10px;
-        padding: 0 12px;
-        color: var(--ink);
-        background: #ffffff;
-        font-size: 17px;
-        font-weight: 760;
-        outline: none;
-      }
-
-      .settings-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-
-      .primary-button,
-      .secondary-button,
-      .danger-button {
-        min-height: 54px;
-        border: 0;
-        border-radius: 13px;
-        font-size: 16px;
-        font-weight: 880;
-      }
-
-      .primary-button {
-        color: #ffffff;
-        background: var(--green);
-      }
-
-      .secondary-button {
-        color: var(--ink);
-        background: #e3efe7;
-      }
-
-      .danger-button {
-        color: #ffffff;
-        background: var(--danger);
-      }
-
       .button-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -476,10 +614,136 @@
         margin-top: 12px;
       }
 
+      .setting-card {
+        display: grid;
+        gap: 7px;
+        padding: 11px;
+      }
+
+      .setting-card input {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #cfe1d5;
+        border-radius: 12px;
+        padding: 0 12px;
+        color: var(--ink);
+        background: #ffffff;
+        font-size: 17px;
+        font-weight: 780;
+        outline: none;
+      }
+
+      .start-card {
+        padding: 14px;
+        border-radius: 22px;
+        background:
+          linear-gradient(150deg, rgba(7, 164, 93, 0.12), rgba(255, 255, 255, 0.92)),
+          #ffffff;
+      }
+
+      .start-card h1 {
+        margin: 0;
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .start-card p {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .modern-row {
+        display: grid;
+        grid-template-columns: 42px 1fr auto;
+        align-items: center;
+        gap: 12px;
+        margin-top: 12px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(255,255,255,.82);
+      }
+
+      .round-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #062613;
+        background: var(--lime);
+        font-weight: 900;
+      }
+
+      .modern-row strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .modern-row span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .modern-row em {
+        color: var(--green-dark);
+        font-style: normal;
+        font-size: 13px;
+        font-weight: 880;
+      }
+
+      .checkpoint-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .checkpoint-card {
+        display: grid;
+        grid-template-columns: 42px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+      }
+
+      .badge {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #062613;
+        background: #e4efe8;
+        font-weight: 900;
+      }
+
+      .checkpoint-card.done .badge {
+        background: var(--lime);
+      }
+
+      .checkpoint-card strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .checkpoint-card span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .checkpoint-card em {
+        color: var(--green-dark);
+        font-style: normal;
+        font-size: 13px;
+        font-weight: 880;
+      }
+
       .history-list {
         display: grid;
         gap: 10px;
-        padding: 8px 0 0;
       }
 
       .history-card {
@@ -497,14 +761,14 @@
       }
 
       .history-card em {
-        color: #087848;
+        color: var(--green-dark);
         font-style: normal;
         font-size: 15px;
         font-weight: 880;
       }
 
       .empty-history {
-        padding: 30px 14px;
+        padding: 22px 14px;
         color: var(--muted);
         text-align: center;
         font-size: 14px;
@@ -516,25 +780,25 @@
         bottom: 0;
         z-index: 10;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        padding: 10px 18px calc(env(safe-area-inset-bottom, 0px) + 10px);
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        padding: 9px 12px calc(env(safe-area-inset-bottom, 0px) + 9px);
         border-top: 1px solid rgba(15, 25, 17, 0.08);
-        background: rgba(247, 251, 246, 0.92);
+        background: rgba(247, 251, 246, 0.93);
         backdrop-filter: blur(18px);
       }
 
       .tabbar button {
-        min-height: 48px;
+        min-height: 50px;
         display: grid;
         place-items: center;
         gap: 2px;
         border: 0;
-        border-radius: 12px;
+        border-radius: 13px;
         color: #647168;
         background: transparent;
-        font-size: 11px;
-        font-weight: 800;
+        font-size: 10px;
+        font-weight: 820;
       }
 
       .tabbar button.active {
@@ -542,31 +806,16 @@
         background: var(--green);
       }
 
-      .tabbar svg {
-        width: 19px;
-        height: 19px;
-      }
-
       .install-hint {
         display: none;
-        margin: 12px 0 0;
+        margin-top: 12px;
         padding: 12px;
         border: 1px solid #cfe1d5;
-        border-radius: 12px;
+        border-radius: 13px;
         color: #47584d;
         background: #ffffff;
         font-size: 13px;
         line-height: 1.4;
-      }
-
-      .standalone .install-hint {
-        display: none;
-      }
-
-      @keyframes waveMove {
-        to {
-          transform: translateX(36px);
-        }
       }
 
       @media (display-mode: browser) {
@@ -591,6 +840,18 @@
         }
       }
 
+      @keyframes trailMove {
+        to {
+          stroke-dashoffset: -54;
+        }
+      }
+
+      @keyframes waveMove {
+        to {
+          transform: translateX(38px);
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -609,50 +870,94 @@
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 5v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="title-block">
-          <strong>Money Climb</strong>
-          <span id="sessionStatus">Ready to start</span>
+          <strong>Money Quest</strong>
+          <span id="sessionStatus">Journey ready</span>
         </div>
-        <button class="icon-button" data-tab="settings" aria-label="Settings">
+        <button class="icon-button" data-tab="start" aria-label="Start settings">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" stroke="currentColor" stroke-width="2"/><path d="M19 12h2M3 12h2M12 3v2M12 19v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
       </header>
 
       <main>
-        <section class="view active" id="liveView" aria-label="Live money tracker">
+        <section class="view active" id="homeView" aria-label="Home journey">
+          <section class="home-hero">
+            <div class="journey-copy">
+              <div>
+                <span>TODAY'S JOURNEY</span>
+                <h1>Clear today’s money levels.</h1>
+              </div>
+              <div class="streak-pill"><span id="homeStreak">0</span> day streak</div>
+            </div>
+            <svg class="journey-svg" viewBox="0 0 390 280" preserveAspectRatio="none" aria-hidden="true">
+              <rect x="18" y="154" width="76" height="48" rx="18" fill="rgba(255,255,255,.68)" stroke="rgba(9,168,95,.15)" stroke-width="2"/>
+              <rect x="252" y="34" width="82" height="54" rx="20" fill="rgba(255,255,255,.66)" stroke="rgba(9,168,95,.15)" stroke-width="2"/>
+              <rect x="78" y="72" width="72" height="48" rx="18" fill="rgba(255,255,255,.56)" stroke="rgba(9,168,95,.12)" stroke-width="2"/>
+              <path class="trail" d="M60 218 C70 174, 128 194, 146 150 S198 132, 205 98 S260 90, 300 52" fill="none" stroke="#09a85f" stroke-width="13" stroke-linecap="round"/>
+              <path d="M60 218 C70 174, 128 194, 146 150 S198 132, 205 98 S260 90, 300 52" fill="none" stroke="#effff3" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+            </svg>
+            <span class="checkpoint done cp1">1</span>
+            <span class="checkpoint cp2">2</span>
+            <span class="checkpoint cp3">3</span>
+          </section>
+
+          <div class="home-actions">
+            <button class="primary-button" data-tab="start">Start Workday</button>
+            <div class="stat-grid">
+              <div class="stat-card"><span>Today earned</span><strong id="homeToday">$0</strong></div>
+              <div class="stat-card"><span>Best day</span><strong id="homeBest">$0</strong></div>
+              <div class="stat-card"><span>This week</span><strong id="homeWeek">$0</strong></div>
+              <div class="stat-card"><span>Checkpoints</span><strong id="homeCheckpoints">0/4</strong></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="liveView" aria-label="Live countdown tracker">
           <div class="hero-counter">
             <span class="live-pill"><i class="live-dot"></i><span id="liveLabel">Live earned</span></span>
             <strong class="earned" id="earnedAmount">$0.00</strong>
             <div class="rate-line"><span id="perMinute">+$0.00</span> per minute</div>
           </div>
 
-          <section class="goal-stage" id="goalStage" aria-label="Today goal fill">
-            <div class="stage-top">
-              <span>Today’s money to make</span>
+          <section class="goal-mini" aria-label="Progress to 1000 dollar goal">
+            <div class="goal-mini-row">
+              <span>Progress to $1,000</span>
               <strong><span id="percentToGoal">0%</span> to <span id="goalLabel">$1,000</span></strong>
             </div>
-            <div class="amount-target" aria-hidden="true">
-              <div class="wave"></div>
-              <div class="target-labels">
-                <span id="stageEarned">$0</span>
-                <span id="stageGoal">$1,000</span>
-              </div>
+            <div class="progress-line" id="goalLine"><i></i><b class="pin"></b></div>
+          </section>
+
+          <section class="quest-stage" id="questStage" aria-label="Planned workday checkpoint path">
+            <div class="stage-top">
+              <span>Planned today</span>
+              <strong><span id="questPercent">0%</span> of <span id="plannedTodayLabel">$0</span></strong>
             </div>
-            <div class="goal-ruler">
-              <div class="progress-line"><i></i><b class="pin"></b></div>
-              <div class="ruler-labels"><span>Start</span><span>Goal</span></div>
+            <svg class="quest-map" viewBox="0 0 320 210" preserveAspectRatio="none" aria-hidden="true">
+              <rect class="map-tile" x="18" y="136" width="64" height="42" rx="16"/>
+              <rect class="map-tile" x="126" y="104" width="68" height="44" rx="16"/>
+              <rect class="map-tile" x="228" y="36" width="70" height="48" rx="18"/>
+              <path class="route-base" d="M34 176 C48 126, 94 154, 116 112 S178 104, 192 72 S252 70, 286 30"/>
+              <path class="route-fill" d="M34 176 C48 126, 94 154, 116 112 S178 104, 192 72 S252 70, 286 30"/>
+            </svg>
+            <div id="checkpointRail"></div>
+            <div class="route-avatar" id="routeAvatar" aria-hidden="true">$</div>
+            <div class="quest-labels">
+              <span id="stageEarned">$0</span>
+              <span id="stagePlanned">$0</span>
+            </div>
+            <div class="quest-caption">
+              <span>Now</span>
+              <span>End of workday</span>
             </div>
           </section>
 
-          <section class="history-strip" id="historyStrip" aria-label="Previous day progress"></section>
-
           <section class="metrics" aria-label="Session metrics">
             <div class="metric">
-              <span>Time left today</span>
+              <span>Countdown</span>
               <strong id="timeLeft">0h 00m</strong>
               <div class="progress-line"><i id="timeProgress"></i></div>
             </div>
             <div class="metric">
-              <span>Target remaining</span>
+              <span>Remaining plan</span>
               <strong id="remainingAmount">$0</strong>
               <div class="progress-line"><i id="remainingProgress"></i></div>
             </div>
@@ -671,59 +976,68 @@
 
           <div class="button-row">
             <button class="secondary-button" id="pauseButton">Pause</button>
-            <button class="primary-button" data-tab="settings">Edit Plan</button>
+            <button class="primary-button" data-tab="start">Edit Plan</button>
           </div>
         </section>
 
-        <section class="view" id="settingsView" aria-label="Start day settings">
-          <div class="session-card">
-            <div class="settings-card">
-              <label for="goalInput">Today’s money goal</label>
-              <input id="goalInput" inputmode="decimal" type="number" min="1" step="1" />
+        <section class="view" id="startView" aria-label="Start workday">
+          <section class="start-card card">
+            <h1>Start Workday</h1>
+            <p>Set the plan like starting a workout. The live path advances through checkpoints toward what this session should make by the end.</p>
+            <div class="modern-row">
+              <span class="round-icon">$</span>
+              <div><strong>Projected today</strong><span id="projectedPreview">$0 from this plan</span></div>
+              <em id="goalPreview">0% goal</em>
             </div>
-            <div class="settings-grid">
-              <div class="settings-card">
-                <label for="rateInput">Hourly rate</label>
-                <input id="rateInput" inputmode="decimal" type="number" min="0" step="0.01" />
-              </div>
-              <div class="settings-card">
-                <label for="durationInput">Stay focused hours</label>
-                <input id="durationInput" inputmode="decimal" type="number" min="0.25" step="0.25" />
-              </div>
-            </div>
-            <div class="settings-grid">
-              <div class="settings-card">
-                <label for="returnInput">Compound rate %</label>
-                <input id="returnInput" inputmode="decimal" type="number" min="0" step="0.1" />
-              </div>
-              <div class="settings-card">
-                <label for="yearsInput">Years</label>
-                <input id="yearsInput" inputmode="numeric" type="number" min="1" step="1" />
-              </div>
-            </div>
-            <button class="primary-button" id="startButton">Start Today</button>
-            <button class="danger-button" id="clearHistoryButton">Clear History</button>
-            <p class="install-hint">To put this on your iPhone: open this page in Safari, tap Share, then tap Add to Home Screen. It is free and does not require an Apple Developer account.</p>
+          </section>
+
+          <div class="section-title"><h2>Plan</h2><span>editable</span></div>
+          <div class="settings-grid">
+            <label class="setting-card">Today goal<input id="goalInput" inputmode="decimal" type="number" min="1" step="1" /></label>
+            <label class="setting-card">Hourly rate<input id="rateInput" inputmode="decimal" type="number" min="0" step="0.01" /></label>
+            <label class="setting-card">Work hours<input id="durationInput" inputmode="decimal" type="number" min="0.25" step="0.25" /></label>
+            <label class="setting-card">Compound %<input id="compoundInput" inputmode="decimal" type="number" min="0" max="100" step="1" /></label>
+            <label class="setting-card">Return %<input id="returnInput" inputmode="decimal" type="number" min="0" step="0.1" /></label>
+            <label class="setting-card">Years<input id="yearsInput" inputmode="numeric" type="number" min="1" step="1" /></label>
           </div>
+          <button class="primary-button" id="startButton" style="width:100%;margin-top:12px">Start Tracking</button>
+          <button class="danger-button" id="clearHistoryButton" style="width:100%;margin-top:10px">Clear History</button>
+          <p class="install-hint">On iPhone: open this page in Safari, tap Share, then Add to Home Screen. It stays free and does not require an Apple Developer account.</p>
         </section>
 
-        <section class="view" id="historyView" aria-label="Saved day history">
+        <section class="view" id="statsView" aria-label="Stats and checkpoints">
+          <div class="section-title"><h2>Checkpoints</h2><span id="checkpointSummary">0 reached</span></div>
+          <div class="checkpoint-list" id="checkpointList"></div>
+
+          <div class="section-title"><h2>Journey Stats</h2><span>saved days</span></div>
+          <div class="stat-grid">
+            <div class="stat-card"><span>Total saved</span><strong id="statsTotal">$0</strong></div>
+            <div class="stat-card"><span>Average day</span><strong id="statsAverage">$0</strong></div>
+            <div class="stat-card"><span>Best day</span><strong id="statsBest">$0</strong></div>
+            <div class="stat-card"><span>Streak</span><strong id="statsStreak">0</strong></div>
+          </div>
+
+          <div class="section-title"><h2>History</h2><span>progress kept</span></div>
           <div class="history-list" id="historyList"></div>
         </section>
       </main>
 
       <nav class="tabbar" aria-label="Main navigation">
-        <button class="active" data-tab="live">
+        <button class="active" data-tab="home">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          Home
+        </button>
+        <button data-tab="live">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v18M7 7h7a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           Live
         </button>
-        <button data-tab="settings">
+        <button data-tab="start">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" stroke="currentColor" stroke-width="2"/><path d="M19 12h2M3 12h2M12 3v2M12 19v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Plan
+          Start
         </button>
-        <button data-tab="history">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 6v6l4 2M12 22a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          History
+        <button data-tab="stats">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19V9M12 19V5M19 19v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Stats
         </button>
       </nav>
     </div>

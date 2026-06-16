@@ -1,9 +1,11 @@
-const storageKey = "money-climb-state-v1";
+const storageKey = "money-climb-state-v2";
+const oldStorageKey = "money-climb-state-v1";
 
 const defaultSettings = {
   goal: 1000,
   hourlyRate: 37,
   durationHours: 4,
+  compoundPortion: 40,
   annualReturn: 7,
   years: 40
 };
@@ -22,18 +24,27 @@ const dollars = new Intl.NumberFormat("en-US", {
 });
 
 const els = {
-  app: document.querySelector(".app"),
   views: document.querySelectorAll(".view"),
   tabButtons: document.querySelectorAll("[data-tab]"),
   sessionStatus: document.querySelector("#sessionStatus"),
+  homeStreak: document.querySelector("#homeStreak"),
+  homeToday: document.querySelector("#homeToday"),
+  homeBest: document.querySelector("#homeBest"),
+  homeWeek: document.querySelector("#homeWeek"),
+  homeCheckpoints: document.querySelector("#homeCheckpoints"),
   liveLabel: document.querySelector("#liveLabel"),
   earnedAmount: document.querySelector("#earnedAmount"),
   perMinute: document.querySelector("#perMinute"),
   percentToGoal: document.querySelector("#percentToGoal"),
   goalLabel: document.querySelector("#goalLabel"),
-  goalStage: document.querySelector("#goalStage"),
+  goalLine: document.querySelector("#goalLine"),
+  questStage: document.querySelector("#questStage"),
+  questPercent: document.querySelector("#questPercent"),
+  plannedTodayLabel: document.querySelector("#plannedTodayLabel"),
+  checkpointRail: document.querySelector("#checkpointRail"),
+  routeAvatar: document.querySelector("#routeAvatar"),
   stageEarned: document.querySelector("#stageEarned"),
-  stageGoal: document.querySelector("#stageGoal"),
+  stagePlanned: document.querySelector("#stagePlanned"),
   timeLeft: document.querySelector("#timeLeft"),
   timeProgress: document.querySelector("#timeProgress"),
   remainingAmount: document.querySelector("#remainingAmount"),
@@ -42,17 +53,25 @@ const els = {
   compoundValue: document.querySelector("#compoundValue"),
   returnLabel: document.querySelector("#returnLabel"),
   yearsLabel: document.querySelector("#yearsLabel"),
-  historyStrip: document.querySelector("#historyStrip"),
-  historyList: document.querySelector("#historyList"),
+  projectedPreview: document.querySelector("#projectedPreview"),
+  goalPreview: document.querySelector("#goalPreview"),
   goalInput: document.querySelector("#goalInput"),
   rateInput: document.querySelector("#rateInput"),
   durationInput: document.querySelector("#durationInput"),
+  compoundInput: document.querySelector("#compoundInput"),
   returnInput: document.querySelector("#returnInput"),
   yearsInput: document.querySelector("#yearsInput"),
   startButton: document.querySelector("#startButton"),
   pauseButton: document.querySelector("#pauseButton"),
   resetDayButton: document.querySelector("#resetDayButton"),
-  clearHistoryButton: document.querySelector("#clearHistoryButton")
+  clearHistoryButton: document.querySelector("#clearHistoryButton"),
+  checkpointList: document.querySelector("#checkpointList"),
+  checkpointSummary: document.querySelector("#checkpointSummary"),
+  statsTotal: document.querySelector("#statsTotal"),
+  statsAverage: document.querySelector("#statsAverage"),
+  statsBest: document.querySelector("#statsBest"),
+  statsStreak: document.querySelector("#statsStreak"),
+  historyList: document.querySelector("#historyList")
 };
 
 let state = readState();
@@ -64,20 +83,20 @@ function todayKey() {
 function readState() {
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
-    if (saved && typeof saved === "object") {
-      return {
-        settings: { ...defaultSettings, ...(saved.settings || {}) },
-        session: saved.session || null,
-        history: saved.history || {}
-      };
-    }
+    if (saved && typeof saved === "object") return normalizeState(saved);
+    const old = JSON.parse(localStorage.getItem(oldStorageKey) || "null");
+    if (old && typeof old === "object") return normalizeState(old);
   } catch (error) {
-    // If storage is blocked, keep the app usable for the current browser session.
+    // Keep the app usable if storage parsing fails.
   }
+  return normalizeState({});
+}
+
+function normalizeState(raw) {
   return {
-    settings: { ...defaultSettings },
-    session: null,
-    history: {}
+    settings: { ...defaultSettings, ...(raw.settings || {}) },
+    session: raw.session || null,
+    history: raw.history || {}
   };
 }
 
@@ -85,7 +104,7 @@ function saveState() {
   try {
     localStorage.setItem(storageKey, JSON.stringify(state));
   } catch (error) {
-    // The visible app should still run when private browsing blocks persistence.
+    // Private browsing can block persistence; current session still works.
   }
 }
 
@@ -93,11 +112,15 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function getSession(now = Date.now()) {
-  const settings = state.settings;
+function plannedToday() {
+  return state.settings.hourlyRate * state.settings.durationHours;
+}
+
+function getSession(now = Date.now(), create = true) {
   const existing = state.session;
   if (existing && existing.date === todayKey()) return existing;
-  const durationMs = settings.durationHours * 60 * 60 * 1000;
+  if (!create) return null;
+  const durationMs = state.settings.durationHours * 60 * 60 * 1000;
   state.session = {
     date: todayKey(),
     startedAt: now,
@@ -112,6 +135,7 @@ function getSession(now = Date.now()) {
 }
 
 function sessionElapsedMs(session, now = Date.now()) {
+  if (!session) return 0;
   const pausedExtra = session.paused ? Math.max(0, now - session.pausedAt) : 0;
   return Math.max(0, now - session.startedAt - session.pausedTotalMs - pausedExtra);
 }
@@ -120,7 +144,7 @@ function currentEarned(now = Date.now()) {
   const session = getSession(now);
   const activeMs = sessionElapsedMs(session, now);
   const earnedDuringSession = (state.settings.hourlyRate / 3600000) * activeMs;
-  return Math.min(state.settings.goal, session.baseEarned + earnedDuringSession);
+  return Math.max(0, session.baseEarned + earnedDuringSession);
 }
 
 function formatHours(ms) {
@@ -130,32 +154,87 @@ function formatHours(ms) {
   return `${hours}h ${String(minutes).padStart(2, "0")}m`;
 }
 
-function setProgress(node, value) {
+function setLineProgress(node, percent) {
   if (!node) return;
-  node.style.setProperty("--goal-progress", `${value}%`);
-  node.style.setProperty("--value", `${value}%`);
+  const safePercent = `${clamp(percent, 0, 100)}%`;
+  node.style.setProperty("--value", safePercent);
   const fill = node.querySelector("i");
-  if (fill) fill.style.width = `${value}%`;
+  if (fill) fill.style.width = safePercent;
+}
+
+function setQuestProgress(percent) {
+  const safePercent = clamp(percent, 0, 100);
+  const routeLength = 430;
+  els.questStage.style.setProperty("--route-offset", `${routeLength - routeLength * (safePercent / 100)}`);
+  const position = routePosition(safePercent);
+  els.routeAvatar.style.setProperty("--avatar-x", `${position.x}%`);
+  els.routeAvatar.style.setProperty("--avatar-y", `${position.y}%`);
+}
+
+function routePosition(percent) {
+  const points = [
+    { pct: 0, x: 10, y: 84 },
+    { pct: 25, x: 16, y: 72 },
+    { pct: 50, x: 36, y: 53 },
+    { pct: 75, x: 62, y: 42 },
+    { pct: 100, x: 82, y: 23 }
+  ];
+  const safePercent = clamp(percent, 0, 100);
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    if (safePercent >= start.pct && safePercent <= end.pct) {
+      const local = (safePercent - start.pct) / (end.pct - start.pct);
+      return {
+        x: start.x + (end.x - start.x) * local,
+        y: start.y + (end.y - start.y) * local
+      };
+    }
+  }
+  return points[points.length - 1];
 }
 
 function updateInputs() {
   els.goalInput.value = state.settings.goal;
   els.rateInput.value = state.settings.hourlyRate;
   els.durationInput.value = state.settings.durationHours;
+  els.compoundInput.value = state.settings.compoundPortion;
   els.returnInput.value = state.settings.annualReturn;
   els.yearsInput.value = state.settings.years;
+  updatePlanPreview();
+}
+
+function readDraftSettings() {
+  return {
+    goal: Number(els.goalInput.value) || defaultSettings.goal,
+    hourlyRate: Number(els.rateInput.value) || 0,
+    durationHours: Number(els.durationInput.value) || defaultSettings.durationHours,
+    compoundPortion: clamp(Number(els.compoundInput.value) || 0, 0, 100),
+    annualReturn: Number(els.returnInput.value) || 0,
+    years: Math.max(1, Math.round(Number(els.yearsInput.value) || defaultSettings.years))
+  };
+}
+
+function updatePlanPreview() {
+  const draft = readDraftSettings();
+  const projected = draft.hourlyRate * draft.durationHours;
+  const goalPercent = draft.goal ? clamp((projected / draft.goal) * 100, 0, 999) : 0;
+  els.projectedPreview.textContent = `${dollars.format(projected)} from this plan`;
+  els.goalPreview.textContent = `${Math.round(goalPercent)}% goal`;
 }
 
 function updateLive() {
   const now = Date.now();
   const session = getSession(now);
   const earned = currentEarned(now);
-  const progress = clamp((earned / state.settings.goal) * 100, 0, 100);
+  const planned = Math.max(plannedToday(), 1);
+  const goalProgress = clamp((earned / state.settings.goal) * 100, 0, 100);
+  const questProgress = clamp((earned / planned) * 100, 0, 100);
   const elapsed = sessionElapsedMs(session, now);
   const remainingSessionMs = Math.max(0, session.durationMs - elapsed);
   const timeProgress = clamp((elapsed / session.durationMs) * 100, 0, 100);
-  const remainingMoney = Math.max(0, state.settings.goal - earned);
-  const compoundBase = earned;
+  const remainingPlanned = Math.max(0, planned - earned);
+  const compoundBase = earned * (state.settings.compoundPortion / 100);
   const compoundMultiplier = Math.pow(1 + state.settings.annualReturn / 100, state.settings.years);
   const compounded = compoundBase * compoundMultiplier;
 
@@ -166,25 +245,43 @@ function updateLive() {
   els.sessionStatus.textContent = session.paused ? "Paused" : "Tracking today";
   els.earnedAmount.textContent = money.format(earned);
   els.perMinute.textContent = `+${money.format(state.settings.hourlyRate / 60)}`;
-  els.percentToGoal.textContent = `${Math.round(progress)}%`;
+  els.percentToGoal.textContent = `${Math.round(goalProgress)}%`;
   els.goalLabel.textContent = dollars.format(state.settings.goal);
+  setLineProgress(els.goalLine, Math.max(goalProgress, 2));
+  els.questPercent.textContent = `${Math.round(questProgress)}%`;
+  els.plannedTodayLabel.textContent = dollars.format(planned);
   els.stageEarned.textContent = dollars.format(earned);
-  els.stageGoal.textContent = dollars.format(state.settings.goal);
+  els.stagePlanned.textContent = dollars.format(planned);
+  setQuestProgress(Math.max(questProgress, 2));
   els.timeLeft.textContent = formatHours(remainingSessionMs);
-  els.remainingAmount.textContent = dollars.format(remainingMoney);
-  els.compoundPercent.textContent = `${Math.round(progress)}%`;
+  els.timeProgress.style.width = `${timeProgress}%`;
+  els.remainingAmount.textContent = dollars.format(remainingPlanned);
+  els.remainingProgress.style.width = `${questProgress}%`;
+  els.compoundPercent.textContent = `${state.settings.compoundPortion}%`;
   els.compoundValue.textContent = dollars.format(compounded);
   els.returnLabel.textContent = `${state.settings.annualReturn}%`;
   els.yearsLabel.textContent = state.settings.years;
-
-  els.goalStage.style.setProperty("--goal-progress", `${Math.max(progress, 2)}%`);
-  setProgress(els.goalStage, Math.max(progress, 2));
-  els.timeProgress.style.width = `${timeProgress}%`;
-  els.remainingProgress.style.width = `${progress}%`;
   els.pauseButton.textContent = session.paused ? "Resume" : "Pause";
 
-  renderHistoryStrip();
-  renderHistoryList();
+  renderCheckpointRail(questProgress);
+  renderHome(earned);
+  renderStats();
+}
+
+function checkpoints() {
+  const planned = plannedToday();
+  return [
+    { pct: 25, label: "Warmup", amount: planned * 0.25 },
+    { pct: 50, label: "Cruise", amount: planned * 0.5 },
+    { pct: 75, label: "Push", amount: planned * 0.75 },
+    { pct: 100, label: "Finish", amount: planned }
+  ];
+}
+
+function renderCheckpointRail(questProgress) {
+  els.checkpointRail.innerHTML = checkpoints()
+    .map((point, index) => `<div class="path-node n${index + 1} ${questProgress >= point.pct ? "done" : ""}">${point.pct}</div>`)
+    .join("");
 }
 
 function sortedHistoryEntries() {
@@ -193,20 +290,36 @@ function sortedHistoryEntries() {
     .sort(([a], [b]) => a.localeCompare(b));
 }
 
-function renderHistoryStrip() {
-  const entries = sortedHistoryEntries().slice(-7);
-  els.historyStrip.innerHTML = "";
-  if (!entries.length) {
-    els.historyStrip.innerHTML = '<div class="empty-history" style="grid-column:1/-1;padding:10px 6px">Saved days will appear here after you start tracking.</div>';
-    return;
+function renderHome(todayEarned) {
+  const entries = sortedHistoryEntries();
+  const amounts = entries.map(([, amount]) => Number(amount));
+  const total = amounts.reduce((sum, amount) => sum + amount, 0);
+  const best = Math.max(0, ...amounts);
+  const week = entries.slice(-7).reduce((sum, [, amount]) => sum + Number(amount), 0);
+  const reached = checkpoints().filter((point) => todayEarned >= point.amount).length;
+  const streak = calculateStreak();
+  els.homeStreak.textContent = streak;
+  els.homeToday.textContent = dollars.format(todayEarned);
+  els.homeBest.textContent = dollars.format(best);
+  els.homeWeek.textContent = dollars.format(week);
+  els.homeCheckpoints.textContent = `${reached}/4`;
+  els.statsTotal.textContent = dollars.format(total);
+  els.statsAverage.textContent = dollars.format(amounts.length ? total / amounts.length : 0);
+  els.statsBest.textContent = dollars.format(best);
+  els.statsStreak.textContent = streak;
+}
+
+function calculateStreak() {
+  let count = 0;
+  const history = state.history;
+  const date = new Date(`${todayKey()}T12:00:00`);
+  while (count < 366) {
+    const key = date.toISOString().slice(0, 10);
+    if (!history[key] || Number(history[key]) <= 0) break;
+    count += 1;
+    date.setDate(date.getDate() - 1);
   }
-  entries.forEach(([date, amount]) => {
-    const percent = clamp((Number(amount) / state.settings.goal) * 100, 4, 100);
-    const node = document.createElement("div");
-    node.className = `day-bar${date === todayKey() ? " today" : ""}`;
-    node.innerHTML = `<i style="--bar:${percent}%"></i><span>${weekdayLabel(date)}</span>`;
-    els.historyStrip.appendChild(node);
-  });
+  return count;
 }
 
 function weekdayLabel(dateKey) {
@@ -219,23 +332,43 @@ function friendlyDate(dateKey) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function renderHistoryList() {
+function renderStats() {
+  const earned = currentEarned();
+  const checkpointData = checkpoints();
+  const reached = checkpointData.filter((point) => earned >= point.amount).length;
+  els.checkpointSummary.textContent = `${reached} reached`;
+  els.checkpointList.innerHTML = checkpointData
+    .map((point, index) => {
+      const done = earned >= point.amount;
+      return `
+        <div class="checkpoint-card ${done ? "done" : ""}">
+          <div class="badge">${index + 1}</div>
+          <div>
+            <strong>${point.label}</strong>
+            <span>${point.pct}% of planned workday</span>
+          </div>
+          <em>${dollars.format(point.amount)}</em>
+        </div>
+      `;
+    })
+    .join("");
+
   const entries = sortedHistoryEntries().slice().reverse();
   if (!entries.length) {
-    els.historyList.innerHTML = '<div class="empty-history">No saved days yet. Start today and your progress will stay here.</div>';
+    els.historyList.innerHTML = '<div class="empty-history">No saved days yet. Start a workday and your journey history will stay here.</div>';
     return;
   }
   els.historyList.innerHTML = entries
     .map(([date, amount]) => {
-      const percent = clamp((Number(amount) / state.settings.goal) * 100, 0, 100);
+      const pct = clamp((Number(amount) / state.settings.goal) * 100, 0, 100);
       return `
         <div class="history-card">
           <div>
-            <span>${date === todayKey() ? "Today" : friendlyDate(date)}</span>
+            <span>${date === todayKey() ? "Today" : `${friendlyDate(date)} · ${weekdayLabel(date)}`}</span>
             <strong>${dollars.format(Number(amount))}</strong>
-            <div class="progress-line" style="margin-top:10px"><i style="width:${Math.max(percent, 2)}%"></i></div>
+            <div class="progress-line" style="margin-top:10px"><i style="width:${Math.max(pct, 2)}%"></i></div>
           </div>
-          <em>${Math.round(percent)}%</em>
+          <em>${Math.round(pct)}%</em>
         </div>
       `;
     })
@@ -243,23 +376,14 @@ function renderHistoryList() {
 }
 
 function switchTab(tab) {
-  els.views.forEach((view) => {
-    view.classList.toggle("active", view.id === `${tab}View`);
-  });
-  els.tabButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.tab === tab);
-  });
-  if (tab === "settings") updateInputs();
+  els.views.forEach((view) => view.classList.toggle("active", view.id === `${tab}View`));
+  els.tabButtons.forEach((button) => button.classList.toggle("active", button.dataset.tab === tab));
+  if (tab === "start") updateInputs();
+  if (tab === "stats") renderStats();
 }
 
 function startToday() {
-  state.settings = {
-    goal: Number(els.goalInput.value) || defaultSettings.goal,
-    hourlyRate: Number(els.rateInput.value) || 0,
-    durationHours: Number(els.durationInput.value) || defaultSettings.durationHours,
-    annualReturn: Number(els.returnInput.value) || 0,
-    years: Math.max(1, Math.round(Number(els.yearsInput.value) || defaultSettings.years))
-  };
+  state.settings = readDraftSettings();
   const now = Date.now();
   state.session = {
     date: todayKey(),
@@ -303,14 +427,17 @@ function clearHistory() {
   state.session = null;
   saveState();
   updateLive();
-  switchTab("live");
+  switchTab("home");
 }
 
 els.tabButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    const tab = button.dataset.tab;
-    if (tab) switchTab(tab);
+    if (button.dataset.tab) switchTab(button.dataset.tab);
   });
+});
+
+[els.goalInput, els.rateInput, els.durationInput, els.compoundInput, els.returnInput, els.yearsInput].forEach((input) => {
+  input.addEventListener("input", updatePlanPreview);
 });
 
 els.startButton.addEventListener("click", startToday);
@@ -318,14 +445,8 @@ els.pauseButton.addEventListener("click", togglePause);
 els.resetDayButton.addEventListener("click", resetToday);
 els.clearHistoryButton.addEventListener("click", clearHistory);
 
-if (window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches) {
-  document.body.classList.add("standalone");
-}
-
 updateInputs();
-const shouldOpenSettings = !state.session;
 updateLive();
-if (shouldOpenSettings) switchTab("settings");
 setInterval(updateLive, 1000);
 
 if ("serviceWorker" in navigator) {

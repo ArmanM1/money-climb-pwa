@@ -1,6 +1,6 @@
 {
-  "name": "Money Climb",
-  "short_name": "Money Climb",
+  "name": "Money Quest",
+  "short_name": "Money Quest",
   "description": "Track daily money progress toward a goal and see compounded value over time.",
   "start_url": "./",
   "scope": "./",

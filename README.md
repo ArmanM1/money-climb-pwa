@@ -1,4 +1,4 @@
-# Money Climb
+# Money Quest
 
 Free installable web app for iPhone.
 
